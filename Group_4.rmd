@@ -128,3 +128,34 @@ ggplot(data, aes(x = wage)) +
 ```
 
 Wehen we look at the histogram of the wage we can see that that most of the values are between 0 and 150'000. There are also some values between 150'000 and 250'000. The values above 250'000 are very rare. This is also a bit as expected because wages above 200'000 are not so common as wages to 150'000.
+
+## Visualization to display the distribution of the categorial features
+
+```{r distribution-categorial}
+
+# Function to plot bar plots for each categorical variable
+plot_categorical_associations <- function(data) {
+  categorical_vars <- sapply(data, is.factor) # or is.factor, depending on how data is loaded
+  data_categorical <- data[, categorical_vars]
+
+  for(var in names(data_categorical)) {
+    # Create the plot and assign it to a variable
+    plot <- ggplot(data, aes(x = !!sym(var))) +
+      geom_bar(position = "stack") +
+      labs(title = paste("Distribution of", var), x = var, y = "Count") +
+      theme_minimal(base_size = 17) +
+      scale_fill_manual(values=c("#105F77", "#f4a460")) +
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 18)
+      )
+    
+    # Print the plot
+    print(plot)
+  }
+}
+
+# Apply the function to the loan dataset
+plot_categorical_associations(data)
+
+```
