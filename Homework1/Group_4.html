@@ -2135,9 +2135,9 @@ model_nn &lt;- train(wage ~ .,
 
 # Stop the cluster
 stopCluster(cl)</code></pre>
-</div>
-<div id="model-evaluation" class="section level2" number="1.6">
-<h2><span class="header-section-number">1.6</span> Model evaluation</h2>
+<div id="model-evaluation" class="section level3" number="1.5.1">
+<h3><span class="header-section-number">1.5.1</span> Model
+evaluation</h3>
 <pre class="r"><code># Use the created model to predict the wage on the test data
 predictions_nn &lt;- predict(model_nn, data_scaled_test)
 
@@ -2232,10 +2232,11 @@ data.</p>
 size 2 and the decay of 1. Because of that we can adjust our grid to
 only use these values. This will speed up our work. In addition we can
 now narrow our grid to values near the current ones to maybe find even
-better vales.</p>
+better values.</p>
 </div>
-<div id="nn-model-with-all-variables" class="section level2" number="1.7">
-<h2><span class="header-section-number">1.7</span> NN Model with all
+</div>
+<div id="nn-model-with-all-variables" class="section level2" number="1.6">
+<h2><span class="header-section-number">1.6</span> NN Model with all
 variables</h2>
 <p>In the first NN model we only used the numeric values. Now we will
 use all variables to see if the model can predict the wage better. We
@@ -2296,9 +2297,9 @@ model_nn &lt;- train(wage ~ .,
 ## aggregated results</code></pre>
 <pre class="r"><code># Stop the cluster
 stopCluster(cl)</code></pre>
-</div>
-<div id="model-evaluation-1" class="section level2" number="1.8">
-<h2><span class="header-section-number">1.8</span> Model evaluation</h2>
+<div id="model-evaluation-1" class="section level3" number="1.6.1">
+<h3><span class="header-section-number">1.6.1</span> Model
+evaluation</h3>
 <pre class="r"><code># Use the created model to predict the wage on the test data
 predictions_nn &lt;- predict(model_nn, data_scaled_test)
 
@@ -2323,6 +2324,250 @@ to predict the wage better. This means that the model is more accurate
 and makes less mistakes when predicting the wage. This is also a sign
 that the model is able to capture the complexity of the data better. But
 still the model isn’t very good at predicting the wage.</p>
+<pre class="r"><code>print(model_nn)</code></pre>
+<pre><code>## Neural Network 
+## 
+## 7569 samples
+##   77 predictor
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 7569, 7569, 7569, 7569, 7569, 7569, ... 
+## Resampling results across tuning parameters:
+## 
+##   size  decay  RMSE       Rsquared   MAE      
+##    2    0.1    0.7677874  0.4105963  0.4679823
+##    2    0.2    0.7446188  0.4396368  0.4364935
+##    2    0.3    0.7502107  0.4336071  0.4443313
+##    2    0.4    0.7374314  0.4507194  0.4327839
+##    2    0.5    0.7338008  0.4551128  0.4290702
+##    2    0.6    0.7250122  0.4687505  0.4194328
+##    2    0.7    0.7245880  0.4688123  0.4123549
+##    2    0.8    0.7275740  0.4647168  0.4169565
+##    2    0.9    0.7244333  0.4681115  0.4162807
+##    2    1.0    0.7269656  0.4640403  0.4175520
+##    4    0.1    0.7785964  0.4154048  0.4592396
+##    4    0.2    0.7640770  0.4298847  0.4494350
+##    4    0.3    0.7567527  0.4358573  0.4396718
+##    4    0.4    0.7596371  0.4359905  0.4371868
+##    4    0.5    0.7314752  0.4640414  0.4257973
+##    4    0.6    0.7334451  0.4619599  0.4181993
+##    4    0.7    0.7485669  0.4440865  0.4304345
+##    4    0.8    0.7270512  0.4683056  0.4179496
+##    4    0.9    0.7215899  0.4750520  0.4114610
+##    4    1.0    0.7214166  0.4742694  0.4121439
+##    6    0.1          NaN        NaN        NaN
+##    6    0.2          NaN        NaN        NaN
+##    6    0.3          NaN        NaN        NaN
+##    6    0.4          NaN        NaN        NaN
+##    6    0.5          NaN        NaN        NaN
+##    6    0.6          NaN        NaN        NaN
+##    6    0.7          NaN        NaN        NaN
+##    6    0.8          NaN        NaN        NaN
+##    6    0.9          NaN        NaN        NaN
+##    6    1.0          NaN        NaN        NaN
+##    8    0.1          NaN        NaN        NaN
+##    8    0.2          NaN        NaN        NaN
+##    8    0.3          NaN        NaN        NaN
+##    8    0.4          NaN        NaN        NaN
+##    8    0.5          NaN        NaN        NaN
+##    8    0.6          NaN        NaN        NaN
+##    8    0.7          NaN        NaN        NaN
+##    8    0.8          NaN        NaN        NaN
+##    8    0.9          NaN        NaN        NaN
+##    8    1.0          NaN        NaN        NaN
+##   10    0.1          NaN        NaN        NaN
+##   10    0.2          NaN        NaN        NaN
+##   10    0.3          NaN        NaN        NaN
+##   10    0.4          NaN        NaN        NaN
+##   10    0.5          NaN        NaN        NaN
+##   10    0.6          NaN        NaN        NaN
+##   10    0.7          NaN        NaN        NaN
+##   10    0.8          NaN        NaN        NaN
+##   10    0.9          NaN        NaN        NaN
+##   10    1.0          NaN        NaN        NaN
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final values used for the model were size = 4 and decay = 1.</code></pre>
+<p>We can see that because of the additional variables the size is now 4
+compared to 2 in the first model. We saw, that the additinal data
+signignificantly improved the model. Because of that we should try to
+adjust our grid to values near the current ones to maybe find even
+better values, especially for the decay because it is at the maximum
+value we provided.</p>
+<pre class="r"><code># Compare values from test to train data
+
+# Extract the resampling results
+resampling_results &lt;- model_nn$resample
+
+# Extract the largest RMSE value
+max_rmse_value &lt;- max(resampling_results$RMSE)
+
+# Print the largest RMSE value
+cat(&quot;Largest RMSE value from NN training model:&quot;, max_rmse_value, &quot;\n&quot;)</code></pre>
+<pre><code>## Largest RMSE value from NN training model: 0.801813</code></pre>
+<pre class="r"><code>cat(&quot;Largest RMSE value from testing data:&quot;, caret::RMSE(data_scaled_test$wage, predictions_nn), &quot;\n&quot;)</code></pre>
+<pre><code>## Largest RMSE value from testing data: 0.692447</code></pre>
+<p>From the values above we can see, that the RMSE value from the test
+data is lower than the RMSE vlaue for the training data. This is
+expected because it is unseen data. Because the difference is not huge
+we can say, taht our model is not overfitted. This is a good sign
+because it means that the model is able to generalize to new data.</p>
+</div>
+</div>
+<div id="nn-model-improvement" class="section level2" number="1.7">
+<h2><span class="header-section-number">1.7</span> NN Model
+improvement</h2>
+<p>In this part we want to improve out NN model with all variables
+because it performed the best. We will try to narrow down the grid to
+find even better values for the model. From our previous model we know
+that the size is 4 and the decay is 1. With this information we adjust
+our grid.</p>
+<pre class="r"><code>set.seed(7)
+
+# Define tune grid. Because of time and computing limitations we only use a small grid
+tune_grid &lt;- expand.grid(
+  size = seq(from = 3, to = 4, by = 1),
+  decay = seq(from = 0.6, to = 1, by = 0.01)
+)
+
+# To speed up the training process we use parallel processing with the help of the doParallel package
+cl &lt;- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Define model
+model_nn &lt;- train(wage ~ .,
+  data = data_scaled_train,
+  method = &quot;nnet&quot;,
+  maxit = 100,
+  tuneGrid = tune_grid,
+  trace = F,
+  linout = 1
+)
+
+# Stop the cluster
+stopCluster(cl)</code></pre>
+<div id="model-evaluation-2" class="section level3" number="1.7.1">
+<h3><span class="header-section-number">1.7.1</span> Model
+evaluation</h3>
+<pre class="r"><code># Use the created model to predict the wage on the test data
+predictions_nn &lt;- predict(model_nn, data_scaled_test)
+
+# Evaluate the performance of the model
+mse_nn &lt;- mean((predictions_nn - data_scaled_test$wage)^2)
+rmse_nn &lt;- sqrt(mse_nn)
+r_squared_nn &lt;- cor(predictions_nn, data_scaled_test$wage)^2
+
+# Print results
+cat(&quot;RMSE of the tuned NN model:&quot;, rmse_nn, &quot;\n&quot;)</code></pre>
+<pre><code>## RMSE of the tuned NN model: 0.6876791</code></pre>
+<pre class="r"><code>cat(&quot;R-squared of the tuned NN model:&quot;, r_squared_nn, &quot;\n&quot;)</code></pre>
+<pre><code>## R-squared of the tuned NN model: 0.5291276</code></pre>
+<pre class="r"><code>print(model_nn)</code></pre>
+<pre><code>## Neural Network 
+## 
+## 7569 samples
+##   77 predictor
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 7569, 7569, 7569, 7569, 7569, 7569, ... 
+## Resampling results across tuning parameters:
+## 
+##   size  decay  RMSE       Rsquared   MAE      
+##   3     0.60   0.7225247  0.4729942  0.4137140
+##   3     0.61   0.7236833  0.4716401  0.4144040
+##   3     0.62   0.7337021  0.4584324  0.4215863
+##   3     0.63   0.7302056  0.4639993  0.4194794
+##   3     0.64   0.7264850  0.4671044  0.4137584
+##   3     0.65   0.7296509  0.4639682  0.4200093
+##   3     0.66   0.7351532  0.4585478  0.4210891
+##   3     0.67   0.7275346  0.4670378  0.4177733
+##   3     0.68   0.7254242  0.4685133  0.4178759
+##   3     0.69   0.7299595  0.4645072  0.4163454
+##   3     0.70   0.7294521  0.4629012  0.4188821
+##   3     0.71   0.7320635  0.4615006  0.4200891
+##   3     0.72   0.7347966  0.4588447  0.4216845
+##   3     0.73   0.7208705  0.4747882  0.4086928
+##   3     0.74   0.7292232  0.4639056  0.4200266
+##   3     0.75   0.7257023  0.4681270  0.4083317
+##   3     0.76   0.7287790  0.4659002  0.4164722
+##   3     0.77   0.7292492  0.4661134  0.4158816
+##   3     0.78   0.7325063  0.4604223  0.4205302
+##   3     0.79   0.7251080  0.4708066  0.4096750
+##   3     0.80   0.7210010  0.4750117  0.4117680
+##   3     0.81   0.7266371  0.4670954  0.4193617
+##   3     0.82   0.7421786  0.4526153  0.4204429
+##   3     0.83   0.7275607  0.4681328  0.4143292
+##   3     0.84   0.7296610  0.4652978  0.4181084
+##   3     0.85   0.7311946  0.4619546  0.4229908
+##   3     0.86   0.7278909  0.4664096  0.4140640
+##   3     0.87   0.7271806  0.4669694  0.4117047
+##   3     0.88   0.7214681  0.4736793  0.4118573
+##   3     0.89   0.7222362  0.4726248  0.4101208
+##   3     0.90   0.7248421  0.4692871  0.4148873
+##   3     0.91   0.7193940  0.4766886  0.4073569
+##   3     0.92   0.7363936  0.4549463  0.4204881
+##   3     0.93   0.7286734  0.4657405  0.4166249
+##   3     0.94   0.7190973  0.4772499  0.4041258
+##   3     0.95   0.7279181  0.4648661  0.4116991
+##   3     0.96   0.7201570  0.4747320  0.4131159
+##   3     0.97   0.7223784  0.4728520  0.4126423
+##   3     0.98   0.7204050  0.4754157  0.4102650
+##   3     0.99   0.7292557  0.4664823  0.4168322
+##   3     1.00   0.7212264  0.4736277  0.4119181
+##   4     0.60   0.7383552  0.4564005  0.4240910
+##   4     0.61   0.7365925  0.4578439  0.4251996
+##   4     0.62   0.7326172  0.4626758  0.4269366
+##   4     0.63   0.7314022  0.4641071  0.4191332
+##   4     0.64   0.7345449  0.4605031  0.4214524
+##   4     0.65   0.7476297  0.4474279  0.4313450
+##   4     0.66   0.7350273  0.4606369  0.4178684
+##   4     0.67   0.7334512  0.4611878  0.4221019
+##   4     0.68   0.7242749  0.4730109  0.4147196
+##   4     0.69   0.7337509  0.4606714  0.4230372
+##   4     0.70   0.7351754  0.4599420  0.4234629
+##   4     0.71   0.7358256  0.4589560  0.4249821
+##   4     0.72   0.7355255  0.4599835  0.4257508
+##   4     0.73   0.7431986  0.4514630  0.4286664
+##   4     0.74   0.7322053  0.4635418  0.4173978
+##   4     0.75   0.7329976  0.4621302  0.4183604
+##   4     0.76   0.7295114  0.4654505  0.4171977
+##   4     0.77   0.7200564  0.4774379  0.4104049
+##   4     0.78   0.7336587  0.4610678  0.4204180
+##   4     0.79   0.7328883  0.4612191  0.4193672
+##   4     0.80   0.7321278  0.4616649  0.4215756
+##   4     0.81   0.7286443  0.4669350  0.4193367
+##   4     0.82   0.7296369  0.4648257  0.4227713
+##   4     0.83   0.7294576  0.4663904  0.4192343
+##   4     0.84   0.7409008  0.4556393  0.4189257
+##   4     0.85   0.7310161  0.4646764  0.4190595
+##   4     0.86   0.7348107  0.4597668  0.4256685
+##   4     0.87   0.7278815  0.4672575  0.4162063
+##   4     0.88   0.7372905  0.4564748  0.4198719
+##   4     0.89   0.7286257  0.4668631  0.4159957
+##   4     0.90   0.7225858  0.4743431  0.4086202
+##   4     0.91   0.7245886  0.4706961  0.4122587
+##   4     0.92   0.7300509  0.4655233  0.4197508
+##   4     0.93   0.7242688  0.4708581  0.4133067
+##   4     0.94   0.7277664  0.4661681  0.4161110
+##   4     0.95   0.7252951  0.4699002  0.4152874
+##   4     0.96   0.7479926  0.4452376  0.4262332
+##   4     0.97   0.7318247  0.4663909  0.4168829
+##   4     0.98   0.7277354  0.4702586  0.4147005
+##   4     0.99   0.7392311  0.4566366  0.4190227
+##   4     1.00   0.7293614  0.4642509  0.4170671
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final values used for the model were size = 3 and decay = 0.94.</code></pre>
+<p>As we can see the model has immproved in the RSME from 0.80 to 0.69.
+This means that our model makes less error when predicting the wage. But
+in the same time our model got worse at the R-squared from 0.69 to 0.53.
+This means that our model is able to explain less variance in the data.
+This is a sign that our model is not able to capture the complexity of
+the data as good as before. This is a sign that our model is not able to
+generalize to new data as good as before.</p>
+</div>
 </div>
 </div>
 

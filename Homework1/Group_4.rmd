@@ -209,7 +209,7 @@ model_nn <- train(wage ~ .,
 stopCluster(cl)
 ```
 
-## Model evaluation
+### Model evaluation
 
 ```{r NNModelEvaluation}
 # Use the created model to predict the wage on the test data
@@ -295,7 +295,7 @@ model_nn <- train(wage ~ .,
 stopCluster(cl)
 ```
 
-## Model evaluation
+### Model evaluation
 
 ```{r NNModelEvaluation2}
 # Use the created model to predict the wage on the test data
@@ -321,3 +321,72 @@ print(model_nn)
 
 We can see that because of the additional variables the size is now 4 compared to 2 in the first model. 
 We saw, that the additinal data signignificantly improved the model. Because of that we should try to adjust our grid to values near the current ones to maybe find even better values, especially for the decay because it is at the maximum value we provided.
+
+```{r}
+# Compare values from test to train data
+
+# Extract the resampling results
+resampling_results <- model_nn$resample
+
+# Extract the largest RMSE value
+max_rmse_value <- max(resampling_results$RMSE)
+
+# Print the largest RMSE value
+cat("Largest RMSE value from NN training model:", max_rmse_value, "\n")
+cat("Largest RMSE value from testing data:", caret::RMSE(data_scaled_test$wage, predictions_nn), "\n")
+```
+From the values above we can see, that the RMSE value from the test data is lower than the RMSE vlaue for the training data. This is expected because it is unseen data. Because the difference is not huge we can say, taht our model is not overfitted. This is a good sign because it means that the model is able to generalize to new data.
+
+## NN Model improvement
+In this part we want to improve out NN model with all variables because it performed the best. We will try to narrow down the grid to find even better values for the model.
+From our previous model we know that the size is 4 and the decay is 1. With this information we adjust our grid.
+
+
+```{r NNModelCreation3}
+set.seed(7)
+
+# Define tune grid. Because of time and computing limitations we only use a small grid
+tune_grid <- expand.grid(
+  size = seq(from = 3, to = 4, by = 1),
+  decay = seq(from = 0.6, to = 1, by = 0.01)
+)
+
+# To speed up the training process we use parallel processing with the help of the doParallel package
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Define model
+model_nn <- train(wage ~ .,
+  data = data_scaled_train,
+  method = "nnet",
+  maxit = 100,
+  tuneGrid = tune_grid,
+  trace = F,
+  linout = 1
+)
+
+# Stop the cluster
+stopCluster(cl)
+```
+
+### Model evaluation
+
+```{r NNModelEvaluation3}
+# Use the created model to predict the wage on the test data
+predictions_nn <- predict(model_nn, data_scaled_test)
+
+# Evaluate the performance of the model
+mse_nn <- mean((predictions_nn - data_scaled_test$wage)^2)
+rmse_nn <- sqrt(mse_nn)
+r_squared_nn <- cor(predictions_nn, data_scaled_test$wage)^2
+
+# Print results
+cat("RMSE of the tuned NN model:", rmse_nn, "\n")
+cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
+```
+
+```{r}
+print(model_nn)
+```
+
+As we can see the model has immproved in the RSME from 0.80 to 0.69. This means that our model makes less error when predicting the wage. But in the same time our model got worse at the R-squared from 0.69 to 0.53. This means that our model is able to explain less variance in the data. This is a sign that our model is not able to capture the complexity of the data as good as before. This is a sign that our model is not able to generalize to new data as good as before.
