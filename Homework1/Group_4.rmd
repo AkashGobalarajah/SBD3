@@ -35,6 +35,7 @@ options(scipen = 999)
 
 # Set working directory
 setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
+setwd("C:/Users/roman/documents/github/SBD3/Homework1")
 ```
 
 # Project Setup {.unnumbered}
@@ -224,4 +225,6 @@ cat("RMSE of the tuned NN model:", rmse_nn, "\n")
 cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
 ```
 
-When we look at the R-squared value of the neural network model we can see that the model is able to explain 14% of the variance in the data. This is very bad. This could be because the model is not able to capture the complexity of the data. We could try to use a more complex model like a random forest or a gradient boosting model.
+When we look at the R-squared value of the neural network model we can see that the model is able to explain about 14% of the variance in the data. This is very bad. This could be because the model is not able to capture the complexity of the data. We could try to use a more complex model like a random forest or a gradient boosting model.
+
+When we use print to look at the model we can see, that it used the size 2 and the decay of 1. Because of that we can adjust our grid to only use these values. This will speed up our work.
