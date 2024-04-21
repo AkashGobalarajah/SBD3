@@ -15,7 +15,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
 # Create a list of packages to install and load into the work space
-libraries <- c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr", "caret", "doParallel")
+libraries <- c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr", "caret", "doParallel", "mltools")
 
 # Install packages from the predefined libraries list
 lapply(libraries, function(x) {
@@ -35,7 +35,7 @@ options(scipen = 999)
 
 # Set working directory
 setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
-setwd("C:/Users/roman/documents/github/SBD3/Homework1")
+# setwd("C:/Users/roman/documents/github/SBD3/Homework1")
 ```
 
 # Project Setup {.unnumbered}
@@ -226,5 +226,98 @@ cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
 ```
 
 When we look at the R-squared value of the neural network model we can see that the model is able to explain about 14% of the variance in the data. This is very bad. This could be because the model is not able to capture the complexity of the data. We could try to use a more complex model like a random forest or a gradient boosting model.
+When we look at the RMSE value of 0.93 we can see that the model is not able to predict the wage very good. This means that the model is not accurate and makes a lot of mistakes when predicting the wage. This is also a sign that the model is not able to capture the complexity of the data.
 
-When we use print to look at the model we can see, that it used the size 2 and the decay of 1. Because of that we can adjust our grid to only use these values. This will speed up our work.
+```{r}
+print(model_nn)
+caret::RMSE(data_scaled_test$wage, predictions_nn)
+```
+When we use print to look at the model we can see, that it used the size 2 and the decay of 1. Because of that we can adjust our grid to only use these values. This will speed up our work. In addition we can now narrow our grid to values near the current ones to maybe find even better values.
+
+## NN Model with all variables
+In the first NN model we only used the numeric values. Now we will use all variables to see if the model can predict the wage better. We will also scale the numeric variables and combine them with the categorical variables.
+
+```{r}
+# Scale test and train data
+data_scaled_train <- as.data.frame(sapply(data_train[, sapply(data_train, is.numeric)], scale))
+data_scaled_test <- as.data.frame(sapply(data_test[, sapply(data_test, is.numeric)], scale))
+
+# Scale test and train data and add the categorical variables
+# Identify numeric columns only
+numeric_columns <- sapply(data_train, is.numeric)
+
+# Scale the numeric data
+data_scaled_train <- scale(data_train[, numeric_columns])
+
+# Convert the scaled data back to a data frame
+data_scaled_train <- as.data.frame(data_scaled_train)
+
+# Combine the scaled data with the character variable
+data_scaled_train <- cbind(data_train[, !numeric_columns], data_scaled_train)
+
+# Identify numeric columns only
+numeric_columns <- sapply(data_test, is.numeric)
+
+# Scale the numeric data
+data_scaled_test <- scale(data_test[, numeric_columns])
+
+# Convert the scaled data back to a data frame
+data_scaled_test <- as.data.frame(data_scaled_test)
+
+# Combine the scaled data with the character variable
+data_scaled_test <- cbind(data_test[, !numeric_columns], data_scaled_test)
+```
+
+```{r NNModelCreation2}
+set.seed(7)
+
+# Define tune grid. Because of time and computing limitations we only use a small grid
+tune_grid <- expand.grid(
+  size = seq(from = 2, to = 10, by = 2),
+  decay = seq(from = 0.1, to = 1, by = 0.1)
+)
+
+# To speed up the training process we use parallel processing with the help of the doParallel package
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Define model
+model_nn <- train(wage ~ .,
+  data = data_scaled_train,
+  method = "nnet",
+  maxit = 100,
+  tuneGrid = tune_grid,
+  trace = F,
+  linout = 1
+)
+
+# Stop the cluster
+stopCluster(cl)
+```
+
+## Model evaluation
+
+```{r NNModelEvaluation2}
+# Use the created model to predict the wage on the test data
+predictions_nn <- predict(model_nn, data_scaled_test)
+
+# Evaluate the performance of the model
+mse_nn <- mean((predictions_nn - data_scaled_test$wage)^2)
+rmse_nn <- sqrt(mse_nn)
+r_squared_nn <- cor(predictions_nn, data_scaled_test$wage)^2
+
+# Print results
+cat("RMSE of the tuned NN model:", rmse_nn, "\n")
+cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
+```
+As we can see above the model has improved signignificantly.
+When we look at the R-squared value of the neural network model we can see that the model is able to explain about 52% of the variance in the data. This is a big improvement compared to the first model. This is a sign that the model is able to capture the complexity of the data better. This is also a sign that the model is able to generalize better to new data.
+When we look at the RMSE value of 0.69 we can see that the model is able to predict the wage better. This means that the model is more accurate and makes less mistakes when predicting the wage. This is also a sign that the model is able to capture the complexity of the data better.
+But still the model isn't very good at predicting the wage.
+
+```{r}
+print(model_nn)
+```
+
+We can see that because of the additional variables the size is now 4 compared to 2 in the first model. 
+We saw, that the additinal data signignificantly improved the model. Because of that we should try to adjust our grid to values near the current ones to maybe find even better values, especially for the decay because it is at the maximum value we provided.

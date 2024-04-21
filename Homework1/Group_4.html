@@ -2111,7 +2111,9 @@ neural network</h2>
 <pre class="r"><code># Scale test and train data
 data_scaled_train &lt;- as.data.frame(sapply(data_train[, sapply(data_train, is.numeric)], scale))
 data_scaled_test &lt;- as.data.frame(sapply(data_test[, sapply(data_test, is.numeric)], scale))</code></pre>
-<pre class="r"><code># Define tune grid. Because of time and computing limitations we only use a small grid
+<pre class="r"><code>set.seed(7)
+
+# Define tune grid. Because of time and computing limitations we only use a small grid
 tune_grid &lt;- expand.grid(
   size = seq(from = 2, to = 10, by = 2),
   decay = seq(from = 0.1, to = 1, by = 0.1)
@@ -2146,14 +2148,181 @@ r_squared_nn &lt;- cor(predictions_nn, data_scaled_test$wage)^2
 
 # Print results
 cat(&quot;RMSE of the tuned NN model:&quot;, rmse_nn, &quot;\n&quot;)</code></pre>
-<pre><code>## RMSE of the tuned NN model: 0.9277777</code></pre>
+<pre><code>## RMSE of the tuned NN model: 0.9305287</code></pre>
 <pre class="r"><code>cat(&quot;R-squared of the tuned NN model:&quot;, r_squared_nn, &quot;\n&quot;)</code></pre>
-<pre><code>## R-squared of the tuned NN model: 0.1411307</code></pre>
+<pre><code>## R-squared of the tuned NN model: 0.1367221</code></pre>
 <p>When we look at the R-squared value of the neural network model we
-can see that the model is able to explain 12% of the variance in the
-data. This is very bad. This could be because the model is not able to
-capture the complexity of the data. We could try to use a more complex
-model like a random forest or a gradient boosting model.</p>
+can see that the model is able to explain about 14% of the variance in
+the data. This is very bad. This could be because the model is not able
+to capture the complexity of the data. We could try to use a more
+complex model like a random forest or a gradient boosting model. When we
+look at the RMSE value of 0.93 we can see that the model is not able to
+predict the wage very good. This means that the model is not accurate
+and makes a lot of mistakes when predicting the wage. This is also a
+sign that the model is not able to capture the complexity of the
+data.</p>
+<pre class="r"><code>print(model_nn)</code></pre>
+<pre><code>## Neural Network 
+## 
+## 7569 samples
+##   63 predictor
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 7569, 7569, 7569, 7569, 7569, 7569, ... 
+## Resampling results across tuning parameters:
+## 
+##   size  decay  RMSE       Rsquared    MAE      
+##    2    0.1    0.9490502  0.10246621  0.6410403
+##    2    0.2    0.9477079  0.10407159  0.6394619
+##    2    0.3    0.9477269  0.10365436  0.6395978
+##    2    0.4    0.9453485  0.10565398  0.6380908
+##    2    0.5    0.9504298  0.10404127  0.6394397
+##    2    0.6    0.9443624  0.10743375  0.6375748
+##    2    0.7    0.9433986  0.10908484  0.6359870
+##    2    0.8    0.9423297  0.10965664  0.6341793
+##    2    0.9    0.9384499  0.11517601  0.6295497
+##    2    1.0    0.9383228  0.11601847  0.6308992
+##    4    0.1    0.9734005  0.09090274  0.6627811
+##    4    0.2    0.9661605  0.09400711  0.6542946
+##    4    0.3    0.9629542  0.09861900  0.6534685
+##    4    0.4    0.9644703  0.09602785  0.6544755
+##    4    0.5    0.9672271  0.09259084  0.6531173
+##    4    0.6    0.9612043  0.09898158  0.6517034
+##    4    0.7    0.9610425  0.09812514  0.6491977
+##    4    0.8    0.9584964  0.10118908  0.6473539
+##    4    0.9    0.9589026  0.10082385  0.6476716
+##    4    1.0    0.9567411  0.10211580  0.6461445
+##    6    0.1    0.9944879  0.08071712  0.6850627
+##    6    0.2    0.9896010  0.08513613  0.6814342
+##    6    0.3    0.9918041  0.08112493  0.6818206
+##    6    0.4    0.9862856  0.08532336  0.6772186
+##    6    0.5    0.9859620  0.08456076  0.6773059
+##    6    0.6    0.9832569  0.08834841  0.6735909
+##    6    0.7    0.9845222  0.08653907  0.6759399
+##    6    0.8    0.9817929  0.08607828  0.6718013
+##    6    0.9    0.9799579  0.08714526  0.6687463
+##    6    1.0    0.9828108  0.08619252  0.6738065
+##    8    0.1    1.0202248  0.07187470  0.7131427
+##    8    0.2    1.0138597  0.07225827  0.7054723
+##    8    0.3    1.0159120  0.07119221  0.7074402
+##    8    0.4    1.0135161  0.07183055  0.7028890
+##    8    0.5    1.0106769  0.07242915  0.7011180
+##    8    0.6    1.0066553  0.07519726  0.6975251
+##    8    0.7    1.0048563  0.07546704  0.6953879
+##    8    0.8    1.0053304  0.07426052  0.6951034
+##    8    0.9    1.0007045  0.07788399  0.6901224
+##    8    1.0    1.0013558  0.07587881  0.6895457
+##   10    0.1    1.0473509  0.06021168  0.7377930
+##   10    0.2    1.0401447  0.06159230  0.7303118
+##   10    0.3    1.0337454  0.06595813  0.7273937
+##   10    0.4    1.0376996  0.06171349  0.7283051
+##   10    0.5    1.0298688  0.06503485  0.7199345
+##   10    0.6    1.0247523  0.06773662  0.7169117
+##   10    0.7    1.0260238  0.06736183  0.7186614
+##   10    0.8    1.0200046  0.06808038  0.7105506
+##   10    0.9    1.0125690  0.07208411  0.7055715
+##   10    1.0    1.0170421  0.06778032  0.7075092
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final values used for the model were size = 2 and decay = 1.</code></pre>
+<pre class="r"><code>caret::RMSE(data_scaled_test$wage, predictions_nn)</code></pre>
+<pre><code>## [1] 0.9305287</code></pre>
+<p>When we use print to look at the model we can see, that it used the
+size 2 and the decay of 1. Because of that we can adjust our grid to
+only use these values. This will speed up our work. In addition we can
+now narrow our grid to values near the current ones to maybe find even
+better vales.</p>
+</div>
+<div id="nn-model-with-all-variables" class="section level2" number="1.7">
+<h2><span class="header-section-number">1.7</span> NN Model with all
+variables</h2>
+<p>In the first NN model we only used the numeric values. Now we will
+use all variables to see if the model can predict the wage better. We
+will also scale the numeric variables and combine them with the
+categorical variables.</p>
+<pre class="r"><code># Scale test and train data
+data_scaled_train &lt;- as.data.frame(sapply(data_train[, sapply(data_train, is.numeric)], scale))
+data_scaled_test &lt;- as.data.frame(sapply(data_test[, sapply(data_test, is.numeric)], scale))
+
+# Scale test and train data and add the categorical variables
+# Identify numeric columns only
+numeric_columns &lt;- sapply(data_train, is.numeric)
+
+# Scale the numeric data
+data_scaled_train &lt;- scale(data_train[, numeric_columns])
+
+# Convert the scaled data back to a data frame
+data_scaled_train &lt;- as.data.frame(data_scaled_train)
+
+# Combine the scaled data with the character variable
+data_scaled_train &lt;- cbind(data_train[, !numeric_columns], data_scaled_train)
+
+# Identify numeric columns only
+numeric_columns &lt;- sapply(data_test, is.numeric)
+
+# Scale the numeric data
+data_scaled_test &lt;- scale(data_test[, numeric_columns])
+
+# Convert the scaled data back to a data frame
+data_scaled_test &lt;- as.data.frame(data_scaled_test)
+
+# Combine the scaled data with the character variable
+data_scaled_test &lt;- cbind(data_test[, !numeric_columns], data_scaled_test)</code></pre>
+<pre class="r"><code>set.seed(7)
+
+# Define tune grid. Because of time and computing limitations we only use a small grid
+tune_grid &lt;- expand.grid(
+  size = seq(from = 2, to = 10, by = 2),
+  decay = seq(from = 0.1, to = 1, by = 0.1)
+)
+
+# To speed up the training process we use parallel processing with the help of the doParallel package
+cl &lt;- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Define model
+model_nn &lt;- train(wage ~ .,
+  data = data_scaled_train,
+  method = &quot;nnet&quot;,
+  maxit = 100,
+  tuneGrid = tune_grid,
+  trace = F,
+  linout = 1
+)</code></pre>
+<pre><code>## Warning in nominalTrainWorkflow(x = x, y = y, wts = weights, info = trainInfo,
+## : There were missing values in resampled performance measures.</code></pre>
+<pre><code>## Warning in train.default(x, y, weights = w, ...): missing values found in
+## aggregated results</code></pre>
+<pre class="r"><code># Stop the cluster
+stopCluster(cl)</code></pre>
+</div>
+<div id="model-evaluation-1" class="section level2" number="1.8">
+<h2><span class="header-section-number">1.8</span> Model evaluation</h2>
+<pre class="r"><code># Use the created model to predict the wage on the test data
+predictions_nn &lt;- predict(model_nn, data_scaled_test)
+
+# Evaluate the performance of the model
+mse_nn &lt;- mean((predictions_nn - data_scaled_test$wage)^2)
+rmse_nn &lt;- sqrt(mse_nn)
+r_squared_nn &lt;- cor(predictions_nn, data_scaled_test$wage)^2
+
+# Print results
+cat(&quot;RMSE of the tuned NN model:&quot;, rmse_nn, &quot;\n&quot;)</code></pre>
+<pre><code>## RMSE of the tuned NN model: 0.692447</code></pre>
+<pre class="r"><code>cat(&quot;R-squared of the tuned NN model:&quot;, r_squared_nn, &quot;\n&quot;)</code></pre>
+<pre><code>## R-squared of the tuned NN model: 0.521641</code></pre>
+<p>As we can see above the model has improved signignificantly. When we
+look at the R-squared value of the neural network model we can see that
+the model is able to explain about 52% of the variance in the data. This
+is a big improvement compared to the first model. This is a sign that
+the model is able to capture the complexity of the data better. This is
+also a sign that the model is able to generalize better to new data.
+When we look at the RMSE value of 0.69 we can see that the model is able
+to predict the wage better. This means that the model is more accurate
+and makes less mistakes when predicting the wage. This is also a sign
+that the model is able to capture the complexity of the data better. But
+still the model isn’t very good at predicting the wage.</p>
 </div>
 </div>
 
