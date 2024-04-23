@@ -2569,6 +2569,59 @@ the data as good as before. This is a sign that our model is not able to
 generalize to new data as good as before.</p>
 </div>
 </div>
+<div id="model-creatiion-with-xgboost" class="section level2" number="1.8">
+<h2><span class="header-section-number">1.8</span> Model creatiion with
+XGBoost</h2>
+<pre class="r"><code># First we need to split the data into a training and a test set
+set.seed(7)
+
+# Split the data into 70% training and 30% test data
+trainIndex &lt;- createDataPartition(data$wage, p = .7, list = FALSE)
+data_train &lt;- data[trainIndex, ]
+data_test &lt;- data[-trainIndex, ]</code></pre>
+<p>Now we need to scale de data.</p>
+<pre class="r"><code># Scale test and train data
+data_scaled_train &lt;- as.data.frame(sapply(data_train[, sapply(data_train, is.numeric)], scale))
+data_scaled_test &lt;- as.data.frame(sapply(data_test[, sapply(data_test, is.numeric)], scale))</code></pre>
+<pre class="r"><code># Define tune grid
+grid &lt;- expand.grid(
+  nrounds = c(5, 10, 15, 50, 100, 150),
+  max_depth = c(2, 3, 4, 5, 6),
+  eta = c(0.01, 0.1, 0.3),
+  gamma = c(0, 0.1, 0.2),
+  colsample_bytree = c(0.6, 0.8, 1),
+  min_child_weight = c(1, 2, 3)
+)
+
+# Train the XGBoost model
+model_xgb &lt;- xgboost(
+  data = as.matrix(data_scaled_train[, -64]), # excluding the target variable
+  label = data_scaled_train$wage,
+  objective = &quot;reg:squarederror&quot;,
+  nrounds = 10,
+)</code></pre>
+<pre><code>## [1]  train-rmse:1.014783 
+## [2]  train-rmse:0.948650 
+## [3]  train-rmse:0.908845 
+## [4]  train-rmse:0.878094 
+## [5]  train-rmse:0.857371 
+## [6]  train-rmse:0.840811 
+## [7]  train-rmse:0.824872 
+## [8]  train-rmse:0.813345 
+## [9]  train-rmse:0.804235 
+## [10] train-rmse:0.794609</code></pre>
+<div id="model-evaluation-3" class="section level3" number="1.8.1">
+<h3><span class="header-section-number">1.8.1</span> Model
+evaluation</h3>
+<pre class="r"><code># Check how good the model works on unseen data
+predictions_xgb &lt;- predict(model_xgb, as.matrix(data_scaled_test[, -64]))
+
+# Output RMSE value
+RMSE_xgb &lt;- caret::RMSE(data_scaled_test$wage, predictions_xgb)
+RMSE_xgb</code></pre>
+<pre><code>## [1] 0.9391582</code></pre>
+</div>
+</div>
 </div>
 
 

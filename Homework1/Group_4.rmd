@@ -34,7 +34,7 @@ rm(list = ls())
 options(scipen = 999)
 
 # Set working directory
-setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
+# setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
 # setwd("C:/Users/roman/documents/github/SBD3/Homework1")
 ```
 
@@ -390,3 +390,51 @@ print(model_nn)
 ```
 
 As we can see the model has immproved in the RSME from 0.80 to 0.69. This means that our model makes less error when predicting the wage. But in the same time our model got worse at the R-squared from 0.69 to 0.53. This means that our model is able to explain less variance in the data. This is a sign that our model is not able to capture the complexity of the data as good as before. This is a sign that our model is not able to generalize to new data as good as before.
+
+## Model creatiion with XGBoost
+```{r}
+# First we need to split the data into a training and a test set
+set.seed(7)
+
+# Split the data into 70% training and 30% test data
+trainIndex <- createDataPartition(data$wage, p = .7, list = FALSE)
+data_train <- data[trainIndex, ]
+data_test <- data[-trainIndex, ]
+```
+
+Now we need to scale de data. 
+```{r}
+# Scale test and train data
+data_scaled_train <- as.data.frame(sapply(data_train[, sapply(data_train, is.numeric)], scale))
+data_scaled_test <- as.data.frame(sapply(data_test[, sapply(data_test, is.numeric)], scale))
+```
+
+```{r}
+# Define tune grid
+grid <- expand.grid(
+  nrounds = c(5, 10, 15, 50, 100, 150),
+  max_depth = c(2, 3, 4, 5, 6),
+  eta = c(0.01, 0.1, 0.3),
+  gamma = c(0, 0.1, 0.2),
+  colsample_bytree = c(0.6, 0.8, 1),
+  min_child_weight = c(1, 2, 3)
+)
+
+# Train the XGBoost model
+model_xgb <- xgboost(
+  data = as.matrix(data_scaled_train[, -64]), # excluding the target variable
+  label = data_scaled_train$wage,
+  objective = "reg:squarederror",
+  nrounds = 10,
+)
+```
+
+### Model evaluation
+```{r}
+# Check how good the model works on unseen data
+predictions_xgb <- predict(model_xgb, as.matrix(data_scaled_test[, -64]))
+
+# Output RMSE value
+RMSE_xgb <- caret::RMSE(data_scaled_test$wage, predictions_xgb)
+RMSE_xgb
+```
