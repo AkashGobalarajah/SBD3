@@ -396,10 +396,16 @@ As we can see the model has immproved in the RSME from 0.80 to 0.69. This means 
 # First we need to split the data into a training and a test set
 set.seed(7)
 
+# Define one-hot encoding function
+dummy <- dummyVars(" ~ .", data = data)
+
+# Perform one-hot encoding on the data
+data_encoded <- data.frame(predict(dummy, newdata = data))
+
 # Split the data into 70% training and 30% test data
-trainIndex <- createDataPartition(data$wage, p = .7, list = FALSE)
-data_train <- data[trainIndex, ]
-data_test <- data[-trainIndex, ]
+trainIndex <- createDataPartition(data_encoded$wage, p = .7, list = FALSE)
+data_train <- data_encoded[trainIndex, ]
+data_test <- data_encoded[-trainIndex, ]
 ```
 
 Now we need to scale de data. 
@@ -410,29 +416,40 @@ data_scaled_test <- as.data.frame(sapply(data_test[, sapply(data_test, is.numeri
 ```
 
 ```{r}
-# Define tune grid
-grid <- expand.grid(
-  nrounds = c(5, 10, 15, 50, 100, 150),
-  max_depth = c(2, 3, 4, 5, 6),
-  eta = c(0.01, 0.1, 0.3),
-  gamma = c(0, 0.1, 0.2),
-  colsample_bytree = c(0.6, 0.8, 1),
-  min_child_weight = c(1, 2, 3)
+params <- list(
+  max_depth = 6,
+  eta = 0.3,
+  gamma = 0,
+  colsample_bytree = 1,
+  min_child_weight = 1,
+  objective = "reg:squarederror"
 )
 
-# Train the XGBoost model
-model_xgb <- xgboost(
-  data = as.matrix(data_scaled_train[, -64]), # excluding the target variable
-  label = data_scaled_train$wage,
-  objective = "reg:squarederror",
-  nrounds = 10,
+# Convert the data to xgb.DMatrix format
+xgbtrain <- xgb.DMatrix(data = as.matrix(data_scaled_train[, -261]), label = data_scaled_train$wage)
+
+# Perform cross-validation to find the optimal number of rounds
+cv_model <- xgb.cv(
+  params = params,
+  data = xgbtrain,
+  nrounds = 150,
+  nfold = 5,
+  early_stopping_rounds = 10,
+  verbose = 0
+)
+
+# Train the XGBoost model with the optimal number of rounds
+model_xgb <- xgb.train(
+  params = params,
+  data = dtrain,
+  nrounds = cv_model$best_iteration
 )
 ```
 
 ### Model evaluation
 ```{r}
 # Check how good the model works on unseen data
-predictions_xgb <- predict(model_xgb, as.matrix(data_scaled_test[, -64]))
+predictions_xgb <- predict(model_xgb, as.matrix(data_scaled_test[, -261]))
 
 # Output RMSE value
 RMSE_xgb <- caret::RMSE(data_scaled_test$wage, predictions_xgb)
