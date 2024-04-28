@@ -1,0 +1,112 @@
+---
+title: "Group 4 - Disneyland Text Mining"
+author: "Akash Gobalarajah, Cyril Alain Scheurmann, Keijo Alexander Nierula, Roman Krass"
+date: "2024.03.14"
+output:
+html_document:
+toc: true
+toc_depth: 2
+toc_float: true
+number_sections: true
+---
+
+```{r setup, include=FALSE}
+# Getting started by changing the default output of echo to TRUE for the current document
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
+
+# Create a list of packages to install and load into the work space
+libraries = c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr")
+
+# Install packages from the predefined libraries list
+lapply(libraries, function(x) if (!(x %in% installed.packages())) {
+  install.packages(x)
+})
+
+
+# Load libraries
+lapply(libraries, library, quietly = TRUE, character.only = TRUE)
+
+# Remove current environment
+rm(list=ls())
+
+#scientific notation: off
+options(scipen=999)
+
+```
+
+```{r, echo=FALSE}
+# Load the data
+load("/Users/keijo/Documents/FH/Sem6/SBD3/git/SBD3/Homework2/Disneyland.rda")
+
+# Check the structure of the data
+str(reviews)
+
+head(data)
+
+# How many review_locations:
+table(reviews$Reviewer_Location)
+```
+
+
+# 1. What can you tell us about the customers that write reviews? 
+
+* We know that the customers are from all over the world. The most reviews are from the United States, followed by the United Kingdom and Australia. 
+
+
+# 2. What do the visitors talk about in their reviews and how does it relate to sentiment/ratings? 
+
+```{r}
+# Create a word cloud
+
+# Other example
+
+reviews$dic1 <- "NA"
+reviews$dic1 <-str_count(reviews$reviewText, "design|color|black|looks") #is this a good dictonary?!
+reviews$dic1_occurence<- "NA"
+#select threshold for occurence of the topic
+reviews$dic1_occurence<-ifelse(reviews$dic1>=2,1,0)
+#number of reviews that cover topic
+sum(reviews$dic1_occurence)
+
+## VISUALIZE RESULTS
+#sum of reviews that cover topic per day
+plot_data <- reviews %>%
+  group_by (reviewDate_month) %>%
+  summarise(n=sum(dic1_occurence))
+
+ggplot (plot_data, aes (x=reviewDate_month, y=n)) + geom_bar(stat = "identity")+ theme_minimal() + ggtitle("Number of reviews covering the topic (per month)")
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### STEP 4: PERFORM SENTIMENT ANALYSIS
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#Select text column and calculate sentiment scores. You can change the method (e.g."syuzhet", "bing", "nrc")
+reviews$sentiment <- "NA"
+reviews$sentiment <- get_sentiment(reviews$reviewText, method="syuzhet", lang="english")
+
+## VISUALIZE RESULTS
+# mean over time
+plot_data <- reviews %>%
+  group_by (reviewDate_month) %>%
+  summarise(n=mean(sentiment))
+
+ggplot(plot_data, aes (x=reviewDate_month, y=n)) + geom_line()+ theme_minimal() + ggtitle("Sentiment scores over time (mean per month)")
+
+
+```
+
+# 3. What differences can you detect for the three different locations and are there any interesting trends over time? 
+
+```{r}
+# Plot the ratings for several locations over time
+
+
+
+```
+
+
+# 4. What specific advice can you give to our park management based on your analysis? How can we integrate the analysis of reviews in our internal processes, can you think of any data products that would be of value for us?
+
+```{r}
+
+```
