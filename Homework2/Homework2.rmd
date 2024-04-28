@@ -15,7 +15,7 @@ number_sections: true
 knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 
 # Create a list of packages to install and load into the work space
-libraries = c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr")
+libraries = c("tm", "SnowballC", "wordcloud", "RColorBrewer", "syuzhet")
 
 # Install packages from the predefined libraries list
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
@@ -57,8 +57,69 @@ table(reviews$Reviewer_Location)
 # 2. What do the visitors talk about in their reviews and how does it relate to sentiment/ratings? 
 
 ```{r}
-# Create a word cloud
+# First we reate a word cloud to visualize the most common words in the reviews
+reviews_corpus <- Corpus(VectorSource(reviews$Review_Text))
 
+# Preprocessing the text data:
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+reviews_corpus <- tm_map(reviews_corpus, toSpace, "/")
+reviews_corpus <- tm_map(reviews_corpus, toSpace, "@")
+reviews_corpus <- tm_map(reviews_corpus, toSpace, "\\|")
+reviews_corpus <- tm_map(reviews_corpus, content_transformer(tolower))
+reviews_corpus <- tm_map(reviews_corpus, removeNumbers)
+reviews_corpus <- tm_map(reviews_corpus, removeWords, stopwords("english"))
+reviews_corpus <- tm_map(reviews_corpus, removePunctuation)
+reviews_corpus <- tm_map(reviews_corpus, stripWhitespace)
+
+# Creating a term document matrix
+term.matrix <- TermDocumentMatrix(reviews_corpus)
+
+# Remove terms that occur in less than 1% of the documents - because the dataset was too large to process (R ran out of memory)
+term.matrix <- removeSparseTerms(term.matrix, 0.99)
+
+# convert to a regular matrix
+term.matrix <- as.matrix(term.matrix)
+
+v <- sort(rowSums(term.matrix),decreasing=TRUE)
+data <- data.frame(word = names(v),freq=v)
+head(data, 10)
+
+set.seed(17)
+wordcloud(words = data$word, freq = data$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+
+
+```
+
+```{r}
+#Now we create a wordcloud for bad sentiment reviews
+
+# Select only the reviews with a rating of 1 or 2
+reviews_corpus$sentiment.syuzhet <- get_sentiment(reviews_corpus,
+                                                  method="syuzhet",
+                                                  lang="english")
+
+# Create a word cloud for the negative reviews
+reviews_corpus_negative <- reviews_corpus[reviews_corpus$sentiment.syuzhet < 0]
+
+# Creating a term document matrix
+term.matrix.negative <- TermDocumentMatrix(reviews_corpus_negative)
+term.matrix.negative <- as.matrix(term.matrix.negative)
+
+v <- sort(rowSums(term.matrix.negative),decreasing=TRUE)
+data <- data.frame(word = names(v),freq=v)
+
+set.seed(17)
+wordcloud(words = data$word, freq = data$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+
+
+```
+
+
+```{r}
 # Other example
 
 reviews$dic1 <- "NA"
