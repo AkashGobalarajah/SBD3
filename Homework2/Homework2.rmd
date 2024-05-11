@@ -15,7 +15,7 @@ number_sections: true
 knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 
 # Create a list of packages to install and load into the work space
-libraries = c("tm", "SnowballC", "wordcloud", "RColorBrewer", "syuzhet")
+libraries = c("tm", "SnowballC", "wordcloud", "RColorBrewer", "syuzhet", "cld2", "topicmodels", "quanteda", "tidyverse", "tidytext", "reshape2")
 
 # Install packages from the predefined libraries list
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
@@ -42,7 +42,7 @@ load("/Users/keijo/Documents/FH/Sem6/SBD3/git/SBD3/Homework2/Disneyland.rda")
 # Check the structure of the data
 str(reviews)
 
-head(data)
+head(reviews)
 
 # How many review_locations:
 table(reviews$Reviewer_Location)
@@ -56,7 +56,87 @@ table(reviews$Reviewer_Location)
 
 # 2. What do the visitors talk about in their reviews and how does it relate to sentiment/ratings? 
 
+
+## Pre-prosessing the data
 ```{r}
+# Are there other languages than english?
+languages <- detect_language(reviews$Review_Text)
+table(languages)
+
+nrow(reviews)
+# Filter the reviews to only include english reviews
+reviews <- reviews[languages == "en", ]
+
+# Check if there are duplicate reviews
+duplicate_rows <- duplicated(reviews)
+
+# It seems we have 12 duplicates
+print(sum(duplicate_rows))
+
+# Removing the duplicates
+reviews <- unique(reviews)
+
+
+# Check if there are any missing values
+missing_values <- colSums(is.na(reviews))
+print(missing_values)
+
+# Remove the reviews missing values (year and year_month are missing 2613 times)
+reviews <- reviews[complete.cases(reviews), ]
+```
+
+After pre-processing the dataset we can now start the Topic Modelling:
+
+```{r}
+# Tokenize the reviews
+tokens <- tokens(reviews$Review_Text,
+                 remove_punct = TRUE,
+                 remove_symbols = TRUE,
+                 remove_numbers = TRUE,
+                 remove_url = TRUE,
+                 remove_separators = TRUE)
+extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go")
+
+# Remove common stopwords
+tokens <- tokens_select(tokens, pattern = extended_stopwords, selection = "remove")
+
+# transform to lowercase
+tokens <- tokens_tolower(tokens)
+
+# Stem all words
+tokens <-tokens_wordstem(tokens)
+
+# Create n-grams of any length
+tokens <- tokens_ngrams(tokens, n = 1:2)
+
+# Create Document-feature-matrix
+matrix <-dfm(tokens)
+
+# Create LDA model
+reviews_lda <- LDA(matrix, k = 3, control = list(seed = 1111))
+
+reviews_lda_td <- tidy(reviews_lda)
+reviews_lda_td
+
+# Extract top-terms per topic
+top_terms <- reviews_lda_td %>%
+  group_by(topic) %>%
+  top_n(8, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+
+top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
+```
+
+
+```{r}
+
 # First we reate a word cloud to visualize the most common words in the reviews
 reviews_corpus <- Corpus(VectorSource(reviews$Review_Text))
 
@@ -67,27 +147,27 @@ reviews_corpus <- tm_map(reviews_corpus, toSpace, "@")
 reviews_corpus <- tm_map(reviews_corpus, toSpace, "\\|")
 reviews_corpus <- tm_map(reviews_corpus, content_transformer(tolower))
 reviews_corpus <- tm_map(reviews_corpus, removeNumbers)
-reviews_corpus <- tm_map(reviews_corpus, removeWords, stopwords("english"))
+reviews_corpus <- tm_map(reviews_corpus, removeWords, c("disney", "park", "disneyland", stopwords("english")))
 reviews_corpus <- tm_map(reviews_corpus, removePunctuation)
 reviews_corpus <- tm_map(reviews_corpus, stripWhitespace)
 
-# Creating a term document matrix
-term.matrix <- TermDocumentMatrix(reviews_corpus)
-
-# Remove terms that occur in less than 1% of the documents - because the dataset was too large to process (R ran out of memory)
-term.matrix <- removeSparseTerms(term.matrix, 0.99)
-
-# convert to a regular matrix
-term.matrix <- as.matrix(term.matrix)
-
-v <- sort(rowSums(term.matrix),decreasing=TRUE)
-data <- data.frame(word = names(v),freq=v)
-head(data, 10)
-
-set.seed(17)
-wordcloud(words = data$word, freq = data$freq, min.freq = 1,
-          max.words=200, random.order=FALSE, rot.per=0.35,
-          colors=brewer.pal(8, "Dark2"))
+# # Creating a term document matrix
+# term.matrix <- TermDocumentMatrix(reviews_corpus)
+# 
+# # Remove terms that occur in less than 1% of the documents - because the dataset was too large to process (R ran out of memory)
+# term.matrix <- removeSparseTerms(term.matrix, 0.99)
+# 
+# # convert to a regular matrix
+# term.matrix <- as.matrix(term.matrix)
+# 
+# v <- sort(rowSums(term.matrix),decreasing=TRUE)
+# data <- data.frame(word = names(v),freq=v)
+# head(data, 10)
+# 
+# set.seed(17)
+# wordcloud(words = data$word, freq = data$freq, min.freq = 1,
+#           max.words=200, random.order=FALSE, rot.per=0.35,
+#           colors=brewer.pal(8, "Dark2"))
 
 
 ```
@@ -96,11 +176,13 @@ wordcloud(words = data$word, freq = data$freq, min.freq = 1,
 #Now we create a wordcloud for bad sentiment reviews
 
 # Select only the reviews with a rating of 1 or 2
-reviews_corpus$sentiment.syuzhet <- get_sentiment(reviews_corpus,
+reviews_corpus_negative <- reviews_corpus[reviews$Rating %in% c(1, 2)]
+
+reviews_corpus_negative$sentiment.syuzhet <- get_sentiment(reviews_corpus_negative,
                                                   method="syuzhet",
                                                   lang="english")
 
-# Create a word cloud for the negative reviews
+# Create a word cloud for the review with a negative sentiment
 reviews_corpus_negative <- reviews_corpus[reviews_corpus$sentiment.syuzhet < 0]
 
 # Creating a term document matrix
@@ -118,6 +200,39 @@ wordcloud(words = data$word, freq = data$freq, min.freq = 1,
 
 ```
 
+Wordcloud for positive sentiment reviews
+
+```{r}
+# Select only the reviews with a rating of 4 or 5
+reviews_corpus_positive <- reviews_corpus[reviews$Rating %in% c(4, 5)]
+
+reviews_corpus_positive$sentiment.syuzhet <- get_sentiment(reviews_corpus_positive,
+                                                  method="syuzhet",
+                                                  lang="english")
+
+
+
+# Create a word cloud for the review with a positive sentiment
+# reviews_corpus_positive_data <- reviews_corpus_positive[reviews_corpus_positive$sentiment.syuzhet > 0]
+
+# Creating a term document matrix
+term.matrix.positive <- TermDocumentMatrix(reviews_corpus_positive)
+term.matrix.positive <- as.matrix(term.matrix.positive)
+
+v <- sort(rowSums(term.matrix.positive),decreasing=TRUE)
+
+data <- data.frame(word = names(v),freq=v)
+
+data <- data[data$freq > 0, ]
+
+set.seed(17)
+wordcloud(words = data$word, freq = data$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+
+
+
+```
 
 ```{r}
 # Other example
