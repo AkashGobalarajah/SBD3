@@ -134,6 +134,61 @@ top_terms %>%
   coord_flip()
 ```
 
+In the next step we run the topic modelling process for good sentiment reviews:
+```{r}
+# Calculate sentiment for the reviews
+reviews$sentiment.syuzhet <- get_sentiment(reviews$Review_Text,
+                                                  method="syuzhet",
+                                                  lang="english")
+
+good_sentiment_reviews <- subset(reviews, sentiment.syuzhet > 0)
+
+tokens <- tokens(good_sentiment_reviews$Review_Text,
+                 remove_punct = TRUE,
+                 remove_symbols = TRUE,
+                 remove_numbers = TRUE,
+                 remove_url = TRUE,
+                 remove_separators = TRUE)
+extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go")
+
+# Remove common stopwords
+tokens <- tokens_select(tokens, pattern = extended_stopwords, selection = "remove")
+
+# transform to lowercase
+tokens <- tokens_tolower(tokens)
+
+# Stem all words
+tokens <-tokens_wordstem(tokens)
+
+# Create n-grams of any length
+tokens <- tokens_ngrams(tokens, n = 1:2)
+
+# Create Document-feature-matrix
+matrix <-dfm(tokens)
+
+# Create LDA model
+reviews_lda <- LDA(matrix, k = 3, control = list(seed = 1111))
+
+reviews_lda_td <- tidy(reviews_lda)
+reviews_lda_td
+
+# Extract top-terms per topic
+top_terms <- reviews_lda_td %>%
+  group_by(topic) %>%
+  top_n(8, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+
+top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
+
+```
+
 
 ```{r}
 
