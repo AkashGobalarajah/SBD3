@@ -12,10 +12,10 @@ output:
 
 ```{r setup, include=FALSE, echo=FALSE}
 # Getting started by changing the default output of echo to TRUE for the current document
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 
 # Create a list of packages to install and load into the work space
-libraries <- c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr", "caret", "doParallel", "mltools", "knitr")
+libraries <- c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr", "caret", "doParallel", "mltools", "knitr", "DT")
 
 # Install packages from the predefined libraries list
 lapply(libraries, function(x) {
@@ -182,7 +182,7 @@ data_scaled_train <- as.data.frame(sapply(data_train[, sapply(data_train, is.num
 data_scaled_test <- as.data.frame(sapply(data_test[, sapply(data_test, is.numeric)], scale))
 ```
 
-```{r NNModelCreation}
+```{r NNModelCreation, cache = TRUE}
 set.seed(7)
 
 # Define tune grid. Because of time and computing limitations we only use a small grid
@@ -268,7 +268,7 @@ data_scaled_test <- as.data.frame(data_scaled_test)
 data_scaled_test <- cbind(data_test[, !numeric_columns], data_scaled_test)
 ```
 
-```{r NNModelCreation2}
+```{r NNModelCreation2, cache = TRUE}
 set.seed(7)
 
 # Define tune grid. Because of time and computing limitations we only use a small grid
@@ -342,7 +342,7 @@ In this part we want to improve out NN model with all variables because it perfo
 From our previous model we know that the size is 4 and the decay is 1. With this information we adjust our grid.
 
 
-```{r NNModelCreation3}
+```{r NNModelCreation3, cache = TRUE}
 set.seed(7)
 
 # Define tune grid. Because of time and computing limitations we only use a small grid
@@ -468,11 +468,23 @@ In this part we look at the feature importance of the different models
 
 ```{r}
 # Compute permutation-based feature importance
-importance <- varImp(model_nn_3, scale = FALSE)
+importance1 <- varImp(model_nn_1, scale = FALSE)
+importance2 <- varImp(model_nn_2, scale = FALSE)
+importance3 <- varImp(model_nn_3, scale = FALSE)
 
 # Print the feature importance as a table
-print(importance)
+print("Feature Importance Neural Network Model 1")
+print(importance1)
+
+print("Feature Importance Neural Network Model 2")
+print(importance2)
+
+print("Feature Importance Neural Network Model 3")
+print(importance3)
 ```
+In the nerural networks we can see that if we include all variables in the model that the most importan variable is that you live in the USA. We can also see that the feature student is very important, because it is on the second and third place. 
+This is probably because students earn nothing or just a little bit of money. This is expected to have a high impact on the wage.
+
 ## XGBoost
 
 ```{r XGBoostFeatureImportance}
@@ -480,8 +492,12 @@ print(importance)
 importance_matrix <- xgb.importance(feature_names = colnames(data_scaled_train[, -261]), model = model_xgb)
 
 # Print the feature importance as a table
-kable(importance_matrix, caption = "Feature Importance XGBoost Model")
+datatable(importance_matrix, options = list(pageLength = 20), caption = "Feature Importance XGBoost Model")
 ```
 
 As we can see from the feature importance table above the most important feature by far is if a person lives in the USA or not. With a gain of 26.5%. This is very suprising for me because I would have expected that the years of education or the age would be the most important features. But this is a sign that the model is able to capture the complexity of the data.  
 As expected it is also important about 8% if the person is a student or not. This is probably because students earn nothing or just a little bit of money.
+
+## Conclusion
+When comparing the feature importance of all four models we can see, that the feature USA is still the most importan one next to the student feature. What also can be observed is that the top features in the nerual networks have
+around 1.x percent in importance when the first value in the XGBoost model has over 26%. After this value the importance goes down a lot.
