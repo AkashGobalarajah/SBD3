@@ -15,7 +15,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
 # Create a list of packages to install and load into the work space
-libraries <- c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr", "caret", "doParallel", "mltools")
+libraries <- c("readr", "tidyverse", "dlookr", "ggplot2", "xgboost", "dplyr", "caret", "doParallel", "mltools", "knitr")
 
 # Install packages from the predefined libraries list
 lapply(libraries, function(x) {
@@ -35,7 +35,7 @@ options(scipen = 999)
 
 # Set working directory
 # setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
-setwd("C:/Users/roman/documents/github/SBD3/Homework1")
+# setwd("C:/Users/roman/documents/github/SBD3/Homework1")
 ```
 
 # Project Setup {.unnumbered}
@@ -196,7 +196,7 @@ cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
 # Define model
-model_nn <- train(wage ~ .,
+model_nn_1 <- train(wage ~ .,
   data = data_scaled_train,
   method = "nnet",
   maxit = 100,
@@ -213,7 +213,7 @@ stopCluster(cl)
 
 ```{r NNModelEvaluation}
 # Use the created model to predict the wage on the test data
-predictions_nn <- predict(model_nn, data_scaled_test)
+predictions_nn <- predict(model_nn_1, data_scaled_test)
 
 # Evaluate the performance of the model
 mse_nn <- mean((predictions_nn - data_scaled_test$wage)^2)
@@ -229,7 +229,7 @@ When we look at the R-squared value of the neural network model we can see that 
 When we look at the RMSE value of 0.93 we can see that the model is not able to predict the wage very good. This means that the model is not accurate and makes a lot of mistakes when predicting the wage. This is also a sign that the model is not able to capture the complexity of the data.
 
 ```{r}
-print(model_nn)
+print(model_nn_1)
 caret::RMSE(data_scaled_test$wage, predictions_nn)
 ```
 When we use print to look at the model we can see, that it used the size 2 and the decay of 1. Because of that we can adjust our grid to only use these values. This will speed up our work. In addition we can now narrow our grid to values near the current ones to maybe find even better values.
@@ -282,7 +282,7 @@ cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
 # Define model
-model_nn <- train(wage ~ .,
+model_nn_2 <- train(wage ~ .,
   data = data_scaled_train,
   method = "nnet",
   maxit = 100,
@@ -299,7 +299,7 @@ stopCluster(cl)
 
 ```{r NNModelEvaluation2}
 # Use the created model to predict the wage on the test data
-predictions_nn <- predict(model_nn, data_scaled_test)
+predictions_nn <- predict(model_nn_2, data_scaled_test)
 
 # Evaluate the performance of the model
 mse_nn <- mean((predictions_nn - data_scaled_test$wage)^2)
@@ -316,7 +316,7 @@ When we look at the RMSE value of 0.69 we can see that the model is able to pred
 But still the model isn't very good at predicting the wage.
 
 ```{r}
-print(model_nn)
+print(model_nn_2)
 ```
 
 We can see that because of the additional variables the size is now 4 compared to 2 in the first model. 
@@ -326,7 +326,7 @@ We saw, that the additinal data signignificantly improved the model. Because of 
 # Compare values from test to train data
 
 # Extract the resampling results
-resampling_results <- model_nn$resample
+resampling_results <- model_nn_2$resample
 
 # Extract the largest RMSE value
 max_rmse_value <- max(resampling_results$RMSE)
@@ -356,7 +356,7 @@ cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
 # Define model
-model_nn <- train(wage ~ .,
+model_nn_3 <- train(wage ~ .,
   data = data_scaled_train,
   method = "nnet",
   maxit = 100,
@@ -373,7 +373,7 @@ stopCluster(cl)
 
 ```{r NNModelEvaluation3}
 # Use the created model to predict the wage on the test data
-predictions_nn <- predict(model_nn, data_scaled_test)
+predictions_nn <- predict(model_nn_3, data_scaled_test)
 
 # Evaluate the performance of the model
 mse_nn <- mean((predictions_nn - data_scaled_test$wage)^2)
@@ -386,7 +386,7 @@ cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
 ```
 
 ```{r}
-print(model_nn)
+print(model_nn_3)
 ```
 
 As we can see the model has immproved in the RSME from 0.80 to 0.69. This means that our model makes less error when predicting the wage. But in the same time our model got worse at the R-squared from 0.69 to 0.53. This means that our model is able to explain less variance in the data. This is a sign that our model is not able to capture the complexity of the data as good as before. This is a sign that our model is not able to generalize to new data as good as before.
@@ -460,3 +460,28 @@ predictions_xgb <- predict(model_xgb, as.matrix(data_scaled_test[, -261]))
 RMSE_xgb <- caret::RMSE(data_scaled_test$wage, predictions_xgb)
 RMSE_xgb
 ```
+
+# Feature importance
+In this part we look at the feature importance of the different models
+
+## Neural Network
+
+```{r}
+# Compute permutation-based feature importance
+importance <- varImp(model_nn_3, scale = FALSE)
+
+# Print the feature importance as a table
+print(importance)
+```
+## XGBoost
+
+```{r XGBoostFeatureImportance}
+# Compute feature importance
+importance_matrix <- xgb.importance(feature_names = colnames(data_scaled_train[, -261]), model = model_xgb)
+
+# Print the feature importance as a table
+kable(importance_matrix, caption = "Feature Importance XGBoost Model")
+```
+
+As we can see from the feature importance table above the most important feature by far is if a person lives in the USA or not. With a gain of 26.5%. This is very suprising for me because I would have expected that the years of education or the age would be the most important features. But this is a sign that the model is able to capture the complexity of the data.  
+As expected it is also important about 8% if the person is a student or not. This is probably because students earn nothing or just a little bit of money.

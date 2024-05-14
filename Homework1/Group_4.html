@@ -2463,6 +2463,36 @@ cat(&quot;RMSE of the tuned NN model:&quot;, rmse_nn, &quot;\n&quot;)</code></pr
 <pre><code>## RMSE of the tuned NN model: 0.6876791</code></pre>
 <pre class="r"><code>cat(&quot;R-squared of the tuned NN model:&quot;, r_squared_nn, &quot;\n&quot;)</code></pre>
 <pre><code>## R-squared of the tuned NN model: 0.5291276</code></pre>
+<pre class="r"><code># Compute permutation-based feature importance
+importance &lt;- varImp(model_nn, scale = FALSE)
+
+# Print the feature importance as a table
+print(importance)</code></pre>
+<pre><code>## nnet variable importance
+## 
+##   only 20 most important variables shown (out of 246)
+## 
+##                                                               Overall
+## countryUnited States of America                                2.4174
+## Visualization_Altair                                           1.6128
+## job_roleStudent                                                1.5467
+## countrySwitzerland                                             1.4259
+## job_roleChief Officer                                          1.3139
+## countryIndia                                                   1.0293
+## How.long.have.you.been.writing.code.to.analyze.data.1-2 years  1.0167
+## percent_actively.coding50% to 74% of my time                   0.9990
+## industryAccounting/Finance                                     0.9927
+## countryHong Kong (S.A.R.)                                      0.9441
+## age25-29                                                       0.9398
+## countryCanada                                                  0.9198
+## age50-54                                                       0.9080
+## countryAustralia                                               0.9026
+## industryI am a student                                         0.8519
+## age22-24                                                       0.8363
+## years_experience25-30                                          0.8161
+## percent_actively.coding75% to 99% of my time                   0.8112
+## industryOnline Service/Internet-based Services                 0.8112
+## job_roleData Analyst                                           0.7887</code></pre>
 <pre class="r"><code>print(model_nn)</code></pre>
 <pre><code>## Neural Network 
 ## 
@@ -2637,6 +2667,417 @@ predictions_xgb &lt;- predict(model_xgb, as.matrix(data_scaled_test[, -261]))
 RMSE_xgb &lt;- caret::RMSE(data_scaled_test$wage, predictions_xgb)
 RMSE_xgb</code></pre>
 <pre><code>## [1] 0.01651049</code></pre>
+<pre class="r"><code># Compute feature importance
+importance_matrix &lt;- xgb.importance(feature_names = colnames(data_scaled_train[, -261]), model = model_xgb)
+
+# Print the feature importance as a table
+kable(importance_matrix, caption = &quot;Feature Importance XGBoost Model&quot;)</code></pre>
+<table>
+<caption>Feature Importance XGBoost Model</caption>
+<colgroup>
+<col width="80%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Feature</th>
+<th align="right">Gain</th>
+<th align="right">Cover</th>
+<th align="right">Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">wage</td>
+<td align="right">0.9999998</td>
+<td align="right">0.8923963</td>
+<td align="right">0.8022528</td>
+</tr>
+<tr class="even">
+<td align="left">Visualization_Matplotlib</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0018814</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="odd">
+<td align="left">explainability.model_None.I.do.not.use.these.model.explanation.techniques</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001266</td>
+<td align="right">0.0050063</td>
+</tr>
+<tr class="even">
+<td align="left">Activities_Build.and.or.run.the.data.infrastructure.that.my.business.uses.for.storing..analyzing..and.operationalizing.data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0002301</td>
+<td align="right">0.0068836</td>
+</tr>
+<tr class="odd">
+<td align="left">Programming_Java</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0003168</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="even">
+<td align="left">Notebooks_Google.Colab</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0003355</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="odd">
+<td align="left">Activities_Build.and.or.run.a.machine.learning.service.that.operationally.improves.my.product.or.workflows</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0032553</td>
+<td align="right">0.0062578</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_SQL</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0026978</td>
+<td align="right">0.0050063</td>
+</tr>
+<tr class="odd">
+<td align="left">data_Image.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0005098</td>
+<td align="right">0.0056320</td>
+</tr>
+<tr class="even">
+<td align="left">Notebooks_Azure.Notebook</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0002542</td>
+<td align="right">0.0050063</td>
+</tr>
+<tr class="odd">
+<td align="left">data_Geospatial.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0080901</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="even">
+<td align="left">Activities_None.of.these.activities.are.an.important.part.of.my.role.at.work</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0013937</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="odd">
+<td align="left">Programming_R</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0000077</td>
+<td align="right">0.0012516</td>
+</tr>
+<tr class="even">
+<td align="left">Visualization_Plotly</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0005137</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="odd">
+<td align="left">cloud_Microsoft.Azure</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0007563</td>
+<td align="right">0.0056320</td>
+</tr>
+<tr class="even">
+<td align="left">Notebooks_Kaggle.Kernels</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0008921</td>
+<td align="right">0.0050063</td>
+</tr>
+<tr class="odd">
+<td align="left">explainability.model_Examine.individual.model.coefficients</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0061144</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="even">
+<td align="left">Activities_Analyze.and.understand.data.to.influence.product.or.business.decisions</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001815</td>
+<td align="right">0.0056320</td>
+</tr>
+<tr class="odd">
+<td align="left">data_text.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0004285</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_C.C..</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001492</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="odd">
+<td align="left">ML_framework_randomForest</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0005141</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="even">
+<td align="left">Visualization_None</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0018448</td>
+<td align="right">0.0031289</td>
+</tr>
+<tr class="odd">
+<td align="left">ML_framework_PyTorch</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0019646</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="even">
+<td align="left">data_Numerical.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0003071</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="odd">
+<td align="left">data_Categorical.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0006860</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_Python</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0002157</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="odd">
+<td align="left">Activities_Build.prototypes.to.explore.applying.machine.learning.to.new.areas</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0002937</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="even">
+<td align="left">cloud_Amazon.Web.Services..AWS.</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0054597</td>
+<td align="right">0.0050063</td>
+</tr>
+<tr class="odd">
+<td align="left">ML_framework_Scikit.Learn</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0037242</td>
+<td align="right">0.0031289</td>
+</tr>
+<tr class="even">
+<td align="left">Visualization_ggplot2</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0040530</td>
+<td align="right">0.0050063</td>
+</tr>
+<tr class="odd">
+<td align="left">Activities_Do.research.that.advances.the.state.of.the.art.of.machine.learning</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0037882</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="even">
+<td align="left">explainability.model_examine.feature.correlations</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0014982</td>
+<td align="right">0.0031289</td>
+</tr>
+<tr class="odd">
+<td align="left">data_Tabular.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0034108</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="even">
+<td align="left">ML_framework_Keras</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0004280</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="odd">
+<td align="left">explainability.model_SHAP.functions</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0007996</td>
+<td align="right">0.0031289</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_Bash</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0081580</td>
+<td align="right">0.0043805</td>
+</tr>
+<tr class="odd">
+<td align="left">Notebooks_Google.Cloud.Datalab</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001608</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="even">
+<td align="left">data_Genetic.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0004511</td>
+<td align="right">0.0012516</td>
+</tr>
+<tr class="odd">
+<td align="left">Notebooks_None</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0081724</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="even">
+<td align="left">ML_framework_Xgboost</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0041445</td>
+<td align="right">0.0031289</td>
+</tr>
+<tr class="odd">
+<td align="left">cloud_Google.Cloud.Platform..GCP.</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0005888</td>
+<td align="right">0.0025031</td>
+</tr>
+<tr class="even">
+<td align="left">explainability.model_Examine.feature.importances</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0074470</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="odd">
+<td align="left">Notebooks_JupyterHub.Binder</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001507</td>
+<td align="right">0.0037547</td>
+</tr>
+<tr class="even">
+<td align="left">ML_framework_Spark.MLlib</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001767</td>
+<td align="right">0.0025031</td>
+</tr>
+<tr class="odd">
+<td align="left">Visualization_Shiny</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0010533</td>
+<td align="right">0.0031289</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_Scala</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0010331</td>
+<td align="right">0.0025031</td>
+</tr>
+<tr class="odd">
+<td align="left">ML_framework_Caret</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001863</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="even">
+<td align="left">ML_framework_TensorFlow</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0004910</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="odd">
+<td align="left">cloud_I.have.not.used.any.cloud.providers</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0002041</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_SAS.STATA</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0014885</td>
+<td align="right">0.0025031</td>
+</tr>
+<tr class="odd">
+<td align="left">explainability.model_Create.partial.dependence.plots</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0010740</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="even">
+<td align="left">explainability.model_LIME.functions</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001372</td>
+<td align="right">0.0006258</td>
+</tr>
+<tr class="odd">
+<td align="left">data_Sensor.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0006412</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="even">
+<td align="left">Visualization_Altair</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0032673</td>
+<td align="right">0.0018773</td>
+</tr>
+<tr class="odd">
+<td align="left">Programming_Julia</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0011780</td>
+<td align="right">0.0012516</td>
+</tr>
+<tr class="even">
+<td align="left">cloud_Alibaba.Cloud</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0004227</td>
+<td align="right">0.0006258</td>
+</tr>
+<tr class="odd">
+<td align="left">Programming_Visual.Basic.VBA</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0023036</td>
+<td align="right">0.0012516</td>
+</tr>
+<tr class="even">
+<td align="left">cloud_IBM.Cloud</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0072746</td>
+<td align="right">0.0012516</td>
+</tr>
+<tr class="odd">
+<td align="left">Programming_Javascript.Typescript</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0001632</td>
+<td align="right">0.0006258</td>
+</tr>
+<tr class="even">
+<td align="left">ML_framework_H20</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0000785</td>
+<td align="right">0.0006258</td>
+</tr>
+<tr class="odd">
+<td align="left">ML_framework_None</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0000116</td>
+<td align="right">0.0006258</td>
+</tr>
+<tr class="even">
+<td align="left">Programming_MATLAB</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0000168</td>
+<td align="right">0.0012516</td>
+</tr>
+<tr class="odd">
+<td align="left">data_Video.Data</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0000063</td>
+<td align="right">0.0006258</td>
+</tr>
+</tbody>
+</table>
+<p>As we can see from the feature importance table above the most
+important feature by far is if a person lives in the USA or not. With a
+gain of 26.5%. This is very suprising for me because I would have
+expected that the years of education or the age would be the most
+important features. But this is a sign that the model is able to capture
+the complexity of the data.<br />
+As expected it is also important about 8% if the person is a student or
+not. This is probably because students earn nothing or just a little bit
+of money.</p>
 </div>
 </div>
 </div>
