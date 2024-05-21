@@ -85,63 +85,66 @@ print(missing_values)
 reviews <- reviews[complete.cases(reviews), ]
 ```
 
-After pre-processing the dataset we can now start the Topic Modelling:
+To get an overview of what the most used words in the reviews are, we are going to make a wordcloud:
 
 ```{r}
-# Tokenize the reviews
-tokens <- tokens(reviews$Review_Text,
-                 remove_punct = TRUE,
-                 remove_symbols = TRUE,
-                 remove_numbers = TRUE,
-                 remove_url = TRUE,
-                 remove_separators = TRUE)
-extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go")
-
-# Remove common stopwords
-tokens <- tokens_select(tokens, pattern = extended_stopwords, selection = "remove")
-
-# transform to lowercase
-tokens <- tokens_tolower(tokens)
-
-# Stem all words
-tokens <-tokens_wordstem(tokens)
-
-# Create n-grams of any length
-tokens <- tokens_ngrams(tokens, n = 1:2)
-
-# Create Document-feature-matrix
-matrix <-dfm(tokens)
-
-# Create LDA model
-reviews_lda <- LDA(matrix, k = 3, control = list(seed = 1111))
-
-reviews_lda_td <- tidy(reviews_lda)
-reviews_lda_td
-
-# Extract top-terms per topic
-top_terms <- reviews_lda_td %>%
-  group_by(topic) %>%
-  top_n(8, beta) %>%
-  ungroup() %>%
-  arrange(topic, -beta)
+TODO
 
 
-top_terms %>%
-  mutate(term = reorder(term, beta)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
-  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  coord_flip()
+# # Tokenize the reviews
+# tokens <- tokens(reviews$Review_Text,
+#                  remove_punct = TRUE,
+#                  remove_symbols = TRUE,
+#                  remove_numbers = TRUE,
+#                  remove_url = TRUE,
+#                  remove_separators = TRUE)
+# extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go")
+# 
+# # Remove common stopwords
+# tokens <- tokens_select(tokens, pattern = extended_stopwords, selection = "remove")
+# 
+# # transform to lowercase
+# tokens <- tokens_tolower(tokens)
+# 
+# # Stem all words
+# tokens <-tokens_wordstem(tokens)
+# 
+# # Create n-grams of any length
+# tokens <- tokens_ngrams(tokens, n = 1:2)
+# 
+# # Create Document-feature-matrix
+# matrix <-dfm(tokens)
+# 
+# # Create LDA model
+# reviews_lda <- LDA(matrix, k = 3, control = list(seed = 1111))
+# 
+# reviews_lda_td <- tidy(reviews_lda)
+# reviews_lda_td
+# 
+# # Extract top-terms per topic
+# top_terms <- reviews_lda_td %>%
+#   group_by(topic) %>%
+#   top_n(8, beta) %>%
+#   ungroup() %>%
+#   arrange(topic, -beta)
+# 
+# 
+# top_terms %>%
+#   mutate(term = reorder(term, beta)) %>%
+#   ggplot(aes(term, beta, fill = factor(topic))) +
+#   geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+#   facet_wrap(~ topic, scales = "free") +
+#   coord_flip()
 ```
 
-In the next step we run the topic modelling process for good sentiment reviews:
+First we want to find out what the visitors talk about in the reviews that have a positive sentiment and a rating of 4 and 5.
 ```{r}
 # Calculate sentiment for the reviews
 reviews$sentiment.syuzhet <- get_sentiment(reviews$Review_Text,
                                                   method="syuzhet",
                                                   lang="english")
 
-good_sentiment_reviews <- subset(reviews, sentiment.syuzhet > 0)
+good_sentiment_reviews <- subset(reviews, sentiment.syuzhet > 0 & Rating >= 4)
 
 tokens <- tokens(good_sentiment_reviews$Review_Text,
                  remove_punct = TRUE,
@@ -149,7 +152,7 @@ tokens <- tokens(good_sentiment_reviews$Review_Text,
                  remove_numbers = TRUE,
                  remove_url = TRUE,
                  remove_separators = TRUE)
-extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go")
+extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go", "one")
 
 # Remove common stopwords
 tokens <- tokens_select(tokens, pattern = extended_stopwords, selection = "remove")
@@ -189,24 +192,55 @@ top_terms %>%
 
 ```
 
+Next we create a topic model for negative sentiment reviews with a rating of 1 and 2:
+```{r}
+bad_sentiment_reviews <- subset(reviews, sentiment.syuzhet < 0 & Rating <= 2)
+tokens_bad <- tokens(bad_sentiment_reviews$Review_Text,
+                 remove_punct = TRUE,
+                 remove_symbols = TRUE,
+                 remove_numbers = TRUE,
+                 remove_url = TRUE,
+                 remove_separators = TRUE)
+
+tokens_bad <- tokens_select(tokens_bad, pattern = extended_stopwords, selection = "remove")
+tokens_bad <- tokens_tolower(tokens_bad)
+tokens_bad <-tokens_wordstem(tokens_bad)
+tokens_bad <- tokens_ngrams(tokens_bad, n = 1:2)
+matrix_bad <-dfm(tokens_bad)
+reviews_lda_bad <- LDA(matrix_bad, k = 3, control = list(seed = 1111))
+reviews_lda_bad_td <- tidy(reviews_lda_bad)
+
+top_terms_bad <- reviews_lda_bad_td %>%
+  group_by(topic) %>%
+  top_n(8, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms_bad %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_bar(alpha = 0.8, stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
+```
 
 ```{r}
-
-# First we reate a word cloud to visualize the most common words in the reviews
-reviews_corpus <- Corpus(VectorSource(reviews$Review_Text))
-
-# Preprocessing the text data:
-toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
-reviews_corpus <- tm_map(reviews_corpus, toSpace, "/")
-reviews_corpus <- tm_map(reviews_corpus, toSpace, "@")
-reviews_corpus <- tm_map(reviews_corpus, toSpace, "\\|")
-reviews_corpus <- tm_map(reviews_corpus, content_transformer(tolower))
-reviews_corpus <- tm_map(reviews_corpus, removeNumbers)
-reviews_corpus <- tm_map(reviews_corpus, removeWords, c("disney", "park", "disneyland", stopwords("english")))
-reviews_corpus <- tm_map(reviews_corpus, removePunctuation)
-reviews_corpus <- tm_map(reviews_corpus, stripWhitespace)
-
-# # Creating a term document matrix
+# 
+# # First we reate a word cloud to visualize the most common words in the reviews
+# reviews_corpus <- Corpus(VectorSource(reviews$Review_Text))
+# 
+# # Preprocessing the text data:
+# toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+# reviews_corpus <- tm_map(reviews_corpus, toSpace, "/")
+# reviews_corpus <- tm_map(reviews_corpus, toSpace, "@")
+# reviews_corpus <- tm_map(reviews_corpus, toSpace, "\\|")
+# reviews_corpus <- tm_map(reviews_corpus, content_transformer(tolower))
+# reviews_corpus <- tm_map(reviews_corpus, removeNumbers)
+# reviews_corpus <- tm_map(reviews_corpus, removeWords, c("disney", "park", "disneyland", stopwords("english")))
+# reviews_corpus <- tm_map(reviews_corpus, removePunctuation)
+# reviews_corpus <- tm_map(reviews_corpus, stripWhitespace)
+# 
+# # # Creating a term document matrix
 # term.matrix <- TermDocumentMatrix(reviews_corpus)
 # 
 # # Remove terms that occur in less than 1% of the documents - because the dataset was too large to process (R ran out of memory)
@@ -228,116 +262,101 @@ reviews_corpus <- tm_map(reviews_corpus, stripWhitespace)
 ```
 
 ```{r}
-#Now we create a wordcloud for bad sentiment reviews
-
-# Select only the reviews with a rating of 1 or 2
-reviews_corpus_negative <- reviews_corpus[reviews$Rating %in% c(1, 2)]
-
-reviews_corpus_negative$sentiment.syuzhet <- get_sentiment(reviews_corpus_negative,
-                                                  method="syuzhet",
-                                                  lang="english")
-
-# Create a word cloud for the review with a negative sentiment
-reviews_corpus_negative <- reviews_corpus[reviews_corpus$sentiment.syuzhet < 0]
-
-# Creating a term document matrix
-term.matrix.negative <- TermDocumentMatrix(reviews_corpus_negative)
-term.matrix.negative <- as.matrix(term.matrix.negative)
-
-v <- sort(rowSums(term.matrix.negative),decreasing=TRUE)
-data <- data.frame(word = names(v),freq=v)
-
-set.seed(17)
-wordcloud(words = data$word, freq = data$freq, min.freq = 1,
-          max.words=200, random.order=FALSE, rot.per=0.35,
-          colors=brewer.pal(8, "Dark2"))
-
-
-```
-
-Wordcloud for positive sentiment reviews
-
-```{r}
-# Select only the reviews with a rating of 4 or 5
-reviews_corpus_positive <- reviews_corpus[reviews$Rating %in% c(4, 5)]
-
-reviews_corpus_positive$sentiment.syuzhet <- get_sentiment(reviews_corpus_positive,
-                                                  method="syuzhet",
-                                                  lang="english")
-
-
-
-# Create a word cloud for the review with a positive sentiment
-# reviews_corpus_positive_data <- reviews_corpus_positive[reviews_corpus_positive$sentiment.syuzhet > 0]
-
-# Creating a term document matrix
-term.matrix.positive <- TermDocumentMatrix(reviews_corpus_positive)
-term.matrix.positive <- as.matrix(term.matrix.positive)
-
-v <- sort(rowSums(term.matrix.positive),decreasing=TRUE)
-
-data <- data.frame(word = names(v),freq=v)
-
-data <- data[data$freq > 0, ]
-
-set.seed(17)
-wordcloud(words = data$word, freq = data$freq, min.freq = 1,
-          max.words=200, random.order=FALSE, rot.per=0.35,
-          colors=brewer.pal(8, "Dark2"))
-
+# #Now we create a wordcloud for bad sentiment reviews
+# 
+# # Select only the reviews with a rating of 1 or 2
+# reviews_corpus_negative <- reviews_corpus[reviews$Rating %in% c(1, 2)]
+# 
+# reviews_corpus_negative$sentiment.syuzhet <- get_sentiment(reviews_corpus_negative,
+#                                                   method="syuzhet",
+#                                                   lang="english")
+# 
+# # Create a word cloud for the review with a negative sentiment
+# reviews_corpus_negative <- reviews_corpus[reviews_corpus$sentiment.syuzhet < 0]
+# 
+# # Creating a term document matrix
+# term.matrix.negative <- TermDocumentMatrix(reviews_corpus_negative)
+# term.matrix.negative <- as.matrix(term.matrix.negative)
+# 
+# v <- sort(rowSums(term.matrix.negative),decreasing=TRUE)
+# data <- data.frame(word = names(v),freq=v)
+# 
+# set.seed(17)
+# wordcloud(words = data$word, freq = data$freq, min.freq = 1,
+#           max.words=200, random.order=FALSE, rot.per=0.35,
+#           colors=brewer.pal(8, "Dark2"))
 
 
 ```
 
-```{r}
-# Other example
-
-reviews$dic1 <- "NA"
-reviews$dic1 <-str_count(reviews$reviewText, "design|color|black|looks") #is this a good dictonary?!
-reviews$dic1_occurence<- "NA"
-#select threshold for occurence of the topic
-reviews$dic1_occurence<-ifelse(reviews$dic1>=2,1,0)
-#number of reviews that cover topic
-sum(reviews$dic1_occurence)
-
-## VISUALIZE RESULTS
-#sum of reviews that cover topic per day
-plot_data <- reviews %>%
-  group_by (reviewDate_month) %>%
-  summarise(n=sum(dic1_occurence))
-
-ggplot (plot_data, aes (x=reviewDate_month, y=n)) + geom_bar(stat = "identity")+ theme_minimal() + ggtitle("Number of reviews covering the topic (per month)")
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### STEP 4: PERFORM SENTIMENT ANALYSIS
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#Select text column and calculate sentiment scores. You can change the method (e.g."syuzhet", "bing", "nrc")
-reviews$sentiment <- "NA"
-reviews$sentiment <- get_sentiment(reviews$reviewText, method="syuzhet", lang="english")
-
-## VISUALIZE RESULTS
-# mean over time
-plot_data <- reviews %>%
-  group_by (reviewDate_month) %>%
-  summarise(n=mean(sentiment))
-
-ggplot(plot_data, aes (x=reviewDate_month, y=n)) + geom_line()+ theme_minimal() + ggtitle("Sentiment scores over time (mean per month)")
+TODO: summarize the findings from the topic modelling 
 
 
-```
+
+
+
+
 
 # 3. What differences can you detect for the three different locations and are there any interesting trends over time? 
 
+TODO:
+* Group the data by Disneyland_Branch and analyze differences in review topics and sentiments across different locations.
+* Plot the trends in ratings and sentiment scores over time for each location.
+* Perform topic modeling separately for each location to detect unique trends or issues.
+* Compare the results to identify commonalities and differences between the locations.
+
 ```{r}
-# Plot the ratings for several locations over time
+# We group the reviews by branch to analyze differences in ratings and sentiments between the branches
+reviews_by_location <- reviews %>%
+  group_by(Branch) %>%
+  summarise(
+    avg_rating = mean(Rating),
+    count = n(),
+    avg_sentiment = mean(sentiment.syuzhet)
+  )
 
+# Plotting the average ratings and sentiment scores for the three branches
+ggplot(reviews_by_location, aes(x=Branch, y=avg_rating)) +
+  geom_bar(stat="identity") + 
+  theme_minimal() + 
+  ggtitle("Average Rating by Disneyland Branch")
 
+# Plotting the average sentiment scores for the three branches
+ggplot(reviews_by_location, aes(x=Branch, y=avg_sentiment)) +
+  geom_bar(stat="identity") + 
+  theme_minimal() + 
+  ggtitle("Average Sentiment by Disneyland Branch")
+
+# Plotting the average ratings over time for the three branches
+reviews %>%
+  group_by(Year_Month, Branch) %>%
+  summarise(avg_rating = mean(Rating)) %>%
+  ggplot(aes(x=Year_Month, y=avg_rating, color=Branch)) +
+  geom_line() +
+  theme_minimal() +
+  ggtitle("Average Rating Over Time by Disneyland Branch")
+
+# Plotting the average sentiment scores over time for the three branches
+reviews %>%
+  group_by(Year_Month, Branch) %>%
+  summarise(avg_sentiment = mean(sentiment.syuzhet)) %>%
+  ggplot(aes(x=Year_Month, y=avg_sentiment, color=Branch)) +
+  geom_line() +
+  theme_minimal() +
+  ggtitle("Average Sentiment of Reviews Over Time by Disneyland Branch")
 
 ```
 
 
 # 4. What specific advice can you give to our park management based on your analysis? How can we integrate the analysis of reviews in our internal processes, can you think of any data products that would be of value for us?
+
+TODO:
+* Summarize the insights gained from the previous analyses.
+* Provide actionable recommendations, such as:
+  * Areas needing improvement based on negative sentiment topics.
+  * Successful aspects highlighted in positive reviews.
+* Suggest integrating automated sentiment and topic analysis into the review monitoring system to quickly identify emerging issues or trends.
+* Propose creating dashboards for real-time sentiment and topic tracking.
 
 ```{r}
 
