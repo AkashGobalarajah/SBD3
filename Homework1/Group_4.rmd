@@ -124,7 +124,7 @@ ggplot(data, aes(x = wage)) +
   theme_minimal(base_size = 17)
 ```
 
-Wehen we look at the histogram of the wage we can see that that most of the values are between 0 and 150'000. There are also some values between 150'000 and 250'000. The values above 250'000 are very rare. This is also a bit as expected because wages above 200'000 are not so common as wages to 150'000.
+When we look at the histogram of the wage we can see that that most of the values are between 0 and 150'000. There are also some values between 150'000 and 250'000. The values above 250'000 are very rare. This is also a bit as expected because wages above 200'000 are not so common as wages to 150'000.
 
 ## Visualization to display the distribution of the categorial features
 
@@ -163,7 +163,7 @@ plot_categorical_associations(data)
 # Model creation {.unnumbered}
 
 ## Splitting the data into training and test set
-The first step before we can start with the model creation is to split the data into a training and a test set. This is important because we need to test our model on data it has never seen before. This is important to see if the model is able to generalize to new data. It also helpts to identify overfitting if the model is overfitted to the training data.
+The first step before we can start with the model creation is to split the data into a training and a test set. This is important because we need to test our model on data it has never seen before. This is important to see if the model is able to generalize to new data. It also helps to identify overfitting if the model is overfitted to the training data.
 ```{r}
 # First we need to split the data into a training and a test set
 set.seed(7)
@@ -310,7 +310,7 @@ r_squared_nn <- cor(predictions_nn, data_scaled_test$wage)^2
 cat("RMSE of the tuned NN model:", rmse_nn, "\n")
 cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
 ```
-As we can see above the model has improved signignificantly.
+As we can see above the model has improved significantly.
 When we look at the R-squared value of the neural network model we can see that the model is able to explain about 52% of the variance in the data. This is a big improvement compared to the first model. This is a sign that the model is able to capture the complexity of the data better. This is also a sign that the model is able to generalize better to new data.
 When we look at the RMSE value of 0.69 we can see that the model is able to predict the wage better. This means that the model is more accurate and makes less mistakes when predicting the wage. This is also a sign that the model is able to capture the complexity of the data better.
 But still the model isn't very good at predicting the wage.
@@ -320,7 +320,7 @@ print(model_nn_2)
 ```
 
 We can see that because of the additional variables the size is now 4 compared to 2 in the first model. 
-We saw, that the additinal data signignificantly improved the model. Because of that we should try to adjust our grid to values near the current ones to maybe find even better values, especially for the decay because it is at the maximum value we provided.
+We saw, that the additional data significantly improved the model. Because of that we should try to adjust our grid to values near the current ones to maybe find even better values, especially for the decay because it is at the maximum value we provided.
 
 ```{r}
 # Compare values from test to train data
@@ -335,7 +335,7 @@ max_rmse_value <- max(resampling_results$RMSE)
 cat("Largest RMSE value from NN training model:", max_rmse_value, "\n")
 cat("Largest RMSE value from testing data:", caret::RMSE(data_scaled_test$wage, predictions_nn), "\n")
 ```
-From the values above we can see, that the RMSE value from the test data is lower than the RMSE vlaue for the training data. This is expected because it is unseen data. Because the difference is not huge we can say, taht our model is not overfitted. This is a good sign because it means that the model is able to generalize to new data.
+From the values above we can see, that the RMSE value from the test data is lower than the RMSE value for the training data. This is expected because it is unseen data. Because the difference is not huge we can say, that our model is not overfitted. This is a good sign because it means that the model is able to generalize to new data.
 
 ## NN Model improvement
 In this part we want to improve out NN model with all variables because it performed the best. We will try to narrow down the grid to find even better values for the model.
@@ -389,10 +389,10 @@ cat("R-squared of the tuned NN model:", r_squared_nn, "\n")
 print(model_nn_3)
 ```
 
-As we can see the model has immproved in the RSME from 0.80 to 0.69. This means that our model makes less error when predicting the wage. But in the same time our model got worse at the R-squared from 0.69 to 0.53. This means that our model is able to explain less variance in the data. This is a sign that our model is not able to capture the complexity of the data as good as before. This is a sign that our model is not able to generalize to new data as good as before.
+As we can see the model has improved in the RSME from 0.80 to 0.69. This means that our model makes less error when predicting the wage. But in the same time our model got worse at the R-squared from 0.69 to 0.53. This means that our model is able to explain less variance in the data. This is a sign that our model is not able to capture the complexity of the data as good as before. This is a sign that our model is not able to generalize to new data as good as before.
 
-## Model creatiion with XGBoost
-Because XGBoost only works with numeric data we have to encode the ramaining categorical variables with one hot encoding. We will also scale the data.
+## Model creation with XGBoost
+Because XGBoost only works with numeric data we have to encode the remaining categorical variables with one hot encoding. We will also scale the data.
 ```{r}
 # First we need to split the data into a training and a test set
 set.seed(7)
@@ -482,7 +482,7 @@ print(importance2)
 print("Feature Importance Neural Network Model 3")
 print(importance3)
 ```
-In the nerural networks we can see that if we include all variables in the model that the most importan variable is that you live in the USA. We can also see that the feature student is very important, because it is on the second and third place. 
+In the neural networks we can see that if we include all variables in the model that the most important variable is that you live in the USA. We can also see that the feature student is very important, because it is on the second and third place. 
 This is probably because students earn nothing or just a little bit of money. This is expected to have a high impact on the wage.
 
 ## XGBoost
@@ -495,9 +495,19 @@ importance_matrix <- xgb.importance(feature_names = colnames(data_scaled_train[,
 datatable(importance_matrix, options = list(pageLength = 20), caption = "Feature Importance XGBoost Model")
 ```
 
-As we can see from the feature importance table above the most important feature by far is if a person lives in the USA or not. With a gain of 26.5%. This is very suprising for me because I would have expected that the years of education or the age would be the most important features. But this is a sign that the model is able to capture the complexity of the data.  
+As we can see from the feature importance table above the most important feature by far is if a person lives in the USA or not. 
+With a gain of 26.5%. This is very surprising for me because I would have expected that the years of education or the age would be the most important features. 
+But this is a sign that the model is able to capture the complexity of the data.  
 As expected it is also important about 8% if the person is a student or not. This is probably because students earn nothing or just a little bit of money.
 
 ## Conclusion
-When comparing the feature importance of all four models we can see, that the feature USA is still the most importan one next to the student feature. What also can be observed is that the top features in the nerual networks have
-around 1.x percent in importance when the first value in the XGBoost model has over 26%. After this value the importance goes down a lot.
+When comparing the feature importance of all four models we can see, that the feature USA is still the most important one next to the student feature. 
+What also can be observed is that the top features in the neural networks have around 1.x percent in importance when the first value in the XGBoost model has over 26%. 
+After this value the importance goes down a lot.
+
+# Own loan prediction {.unnumbered}
+In this part we evaluate out future loan with our best performing model. This is the neural network in part 1.7.
+
+```{r LoanPrediction}
+# Predict loan with NN model from 1.7
+```
