@@ -35,7 +35,7 @@ options(scipen = 999)
 
 # Set working directory
 # setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
-# setwd("C:/Users/roman/documents/github/SBD3/Homework1")
+setwd("C:/Users/roman/documents/github/SBD3/Homework1")
 ```
 
 # Project Setup {.unnumbered}
@@ -509,5 +509,96 @@ After this value the importance goes down a lot.
 In this part we evaluate out future loan with our best performing model. This is the neural network in part 1.7.
 
 ```{r LoanPrediction}
-# Predict loan with NN model from 1.7
+# Define data frame for each group member to predict their loan
+
+# Roman
+data_roman <- data.frame(
+  gender = "Male",
+  age = 23,
+  country = "Switzerland",
+  education = "Bachelor’s degree",
+  undergraduate_major = "Other",
+  job_role = "Other",
+  industry = "Shipping/Transportation",
+  years_experience = 6,
+  ML_atwork = "We have well established ML methods (i.e., models in production for more than 2 years)",
+  Activities_Analyze.and.understand.data.to.influence.product.or.business.decisions = 1,
+  Activities_Build.and.or.run.a.machine.learning.service.that.operationally.improves.my.product.or.workflows = 0,
+  Activities_Build.and.or.run.the.data.infrastructure.that.my.business.uses.for.storing..analyzing..and.operationalizing.data = 0,
+  Activities_Build.prototypes.to.explore.applying.machine.learning.to.new.areas = 1,
+  Activities_Do.research.that.advances.the.state.of.the.art.of.machine.learning = 0,
+  Activities_None.of.these.activities.are.an.important.part.of.my.role.at.work = 0,
+  Notebooks_Kaggle.Kernels = 0,
+  Notebooks_Google.Colab = 1,
+  Notebooks_Azure.Notebook = 0,
+  Notebooks_Google.Cloud.Datalab = 0,
+  Notebooks_JupyterHub.Binder = 0,
+  Notebooks_None = 0,
+  cloud_Google.Cloud.Platform..GCP. = 0,
+  cloud_Amazon.Web.Services..AWS. = 0,
+  cloud_Microsoft.Azure = 1,
+  cloud_IBM.Cloud = 0,
+  cloud_Alibaba.Cloud = 0,
+  cloud_I.have.not.used.any.cloud.providers = 0,
+  Programming_Python = 0,
+  Programming_R = 1,
+  Programming_SQL = 1,
+  Programming_Bash = 0,
+  Programming_Java = 0,
+  Programming_Javascript.Typescript = 0,
+  Programming_Visual.Basic.VBA = 1,
+  Programming_C.C.. = 0,
+  Programming_MATLAB = 0,
+  Programming_Scala = 0,
+  Programming_Julia = 0,
+  Programming_SAS.STATA = 0,
+  Programming_language_used_most_often = "Other",
+  ML_framework_Scikit.Learn = 0,
+  ML_framework_TensorFlow = 1,
+  ML_framework_Keras = 1,
+  ML_framework_PyTorch = 1,
+  ML_framework_Spark.MLlib = 0,
+  ML_framework_H20 = 1,
+  ML_framework_Caret = 1,
+  ML_framework_Xgboost = 1,
+  ML_framework_randomForest = 1,
+  ML_framework_None = 0,
+  Visualization_ggplot2 = 1,
+  Visualization_Matplotlib = 0,
+  Visualization_Altair = 0,
+  Visualization_Shiny = 1,
+  Visualization_Plotly = 1,
+  Visualization_None = 0,
+  percent_actively.coding = "25% to 49% of my time",
+  How.long.have.you.been.writing.code.to.analyze.data. = "3-5 years",
+  For.how.many.years.have.you.used.machine.learning.methods..at.work.or.in.school.. = "< 1 year",
+  Do.you.consider.yourself.to.be.a.data.scientist. = "Definitely not",
+  data_Categorical.Data = 0,
+  data_Genetic.Data = 0,
+  data_Geospatial.Data = 0,
+  data_Image.Data = 0,
+  data_Numerical.Data = 0,
+  data_Sensor.Data = 0,
+  data_Tabular.Data = 1,
+  data_text.Data = 0,
+  data_Time.Series.Data = 0,
+  data_Video.Data = 0,
+  explainability.model_Examine.individual.model.coefficients = 1,
+  explainability.model_examine.feature.correlations = 0,
+  explainability.model_Examine.feature.importances = 1,
+  explainability.model_Create.partial.dependence.plots = 0,
+  explainability.model_LIME.functions = 0,
+  explainability.model_SHAP.functions = 0,
+  explainability.model_None.I.do.not.use.these.model.explanation.techniques = 0
+)
+
+# Akash
+
+# Cyril
+
+# Keijo
+
+prediction_roman <- predict(model_nn_3, newdata = data_roman)
+prediction_akash <- predict(model_nn_3, newdata = data_akash)
 ```
+
