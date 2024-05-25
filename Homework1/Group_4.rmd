@@ -601,7 +601,7 @@ data_roman <- data.frame(
 # Keijo
 data_keijo <- data.frame(
         gender = "Male",
-        age = "22-24",
+        age = "24",
         country = "Switzerland",
         education = "Bachelor’s degree",
         undergraduate_major = "Other",
