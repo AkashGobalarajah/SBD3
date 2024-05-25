@@ -35,7 +35,7 @@ options(scipen = 999)
 
 # Set working directory
 # setwd("C:/Users/roman/documents/repos/SBD3/Homework1")
-setwd("C:/Users/roman/documents/github/SBD3/Homework1")
+# setwd("C:/Users/roman/documents/github/SBD3/Homework1")
 ```
 
 # Project Setup {.unnumbered}
@@ -160,7 +160,7 @@ plot_categorical_associations(data)
 
 </details>
 
-# Model creation {.unnumbered}
+# Model creation
 
 ## Splitting the data into training and test set
 The first step before we can start with the model creation is to split the data into a training and a test set. This is important because we need to test our model on data it has never seen before. This is important to see if the model is able to generalize to new data. It also helps to identify overfitting if the model is overfitted to the training data.
@@ -333,7 +333,7 @@ max_rmse_value <- max(resampling_results$RMSE)
 
 # Print the largest RMSE value
 cat("Largest RMSE value from NN training model:", max_rmse_value, "\n")
-cat("Largest RMSE value from testing data:", caret::RMSE(data_scaled_test$wage, predictions_nn), "\n")
+cat("RMSE value of the test data:", caret::RMSE(data_scaled_test$wage, predictions_nn), "\n")
 ```
 From the values above we can see, that the RMSE value from the test data is lower than the RMSE value for the training data. This is expected because it is unseen data. Because the difference is not huge we can say, that our model is not overfitted. This is a good sign because it means that the model is able to generalize to new data.
 
@@ -460,6 +460,7 @@ predictions_xgb <- predict(model_xgb, as.matrix(data_scaled_test[, -261]))
 RMSE_xgb <- caret::RMSE(data_scaled_test$wage, predictions_xgb)
 RMSE_xgb
 ```
+When we look at the RMSE value of the model of 0.7 we can see that the model is a bit worse than the neural network model. Both models aren't really good but the XBoost is compared to the neural network a lot faster to train. This is a big advantage because we can try more models in the same time.
 
 # Feature importance
 In this part we look at the feature importance of the different models
@@ -483,7 +484,7 @@ print("Feature Importance Neural Network Model 3")
 print(importance3)
 ```
 In the neural networks we can see that if we include all variables in the model that the most important variable is that you live in the USA. We can also see that the feature student is very important, because it is on the second and third place. 
-This is probably because students earn nothing or just a little bit of money. This is expected to have a high impact on the wage.
+This is probably because students earn nothing or just a little bit of money. This is expected to have a high impact on the wage. What is also expected is that the different countries are important because the wage can vary a lot between different countries that the job role isn't most defining.
 
 ## XGBoost
 
@@ -499,13 +500,14 @@ As we can see from the feature importance table above the most important feature
 With a gain of 26.5%. This is very surprising for me because I would have expected that the years of education or the age would be the most important features. 
 But this is a sign that the model is able to capture the complexity of the data.  
 As expected it is also important about 8% if the person is a student or not. This is probably because students earn nothing or just a little bit of money.
+What also can be observed that in the top 10 features there are only 2 countries compared to 4 in the neural network model. 
 
 ## Conclusion
 When comparing the feature importance of all four models we can see, that the feature USA is still the most important one next to the student feature. 
 What also can be observed is that the top features in the neural networks have around 1.x percent in importance when the first value in the XGBoost model has over 26%. 
-After this value the importance goes down a lot.
+After this value the importance goes down a lot. What also can be sad is that the different model have sometimes the same features in the top 20 but not all.
 
-# Own loan prediction {.unnumbered}
+# Own loan prediction
 In this part we evaluate out future loan with our best performing model. This is the neural network in part 1.7.
 
 ```{r LoanPrediction}
@@ -514,13 +516,13 @@ In this part we evaluate out future loan with our best performing model. This is
 # Roman
 data_roman <- data.frame(
   gender = "Male",
-  age = 23,
+  age = "22-24",
   country = "Switzerland",
   education = "Bachelor’s degree",
   undergraduate_major = "Other",
   job_role = "Other",
   industry = "Shipping/Transportation",
-  years_experience = 6,
+  years_experience = "5-11",
   ML_atwork = "We have well established ML methods (i.e., models in production for more than 2 years)",
   Activities_Analyze.and.understand.data.to.influence.product.or.business.decisions = 1,
   Activities_Build.and.or.run.a.machine.learning.service.that.operationally.improves.my.product.or.workflows = 0,
@@ -598,7 +600,25 @@ data_roman <- data.frame(
 
 # Keijo
 
+# Calculate the mean and standard deviation of the wage column in the original training data. This is used for the descaling later on
+mean_wage <- mean(data_train$wage, na.rm = TRUE)
+sd_wage <- sd(data_train$wage, na.rm = TRUE)
+
 prediction_roman <- predict(model_nn_3, newdata = data_roman)
-prediction_akash <- predict(model_nn_3, newdata = data_akash)
+# prediction_akash <- predict(model_nn_3, newdata = data_akash)
+# prediction_cyril <- predict(model_nn_3, newdata = data_cyril)
+# prediction_keijo <- predict(model_nn_3, newdata = data_keijo)
+
+# Descale the prediction
+prediction_roman_descaled <- prediction_roman * sd_wage + mean_wage
+# prediction_akash_descaled <- prediction_akash * sd_wage + mean_wage
+# prediction_cyril_descaled <- prediction_cyril * sd_wage + mean_wage
+# prediction_keijo_descaled <- prediction_keijo * sd_wage + mean_wage
+
+
+cat("Predicted loan Roman: ", prediction_roman_descaled)
+# cat("Predicted loan Akash: ", prediction_akash)
+# cat("Predicted loan Cyril: ", prediction_cyril)
+# cat("Predicted loan Keijo: ", prediction_keijo)
 ```
 
