@@ -152,7 +152,7 @@ tokens <- tokens(good_sentiment_reviews$Review_Text,
                  remove_numbers = TRUE,
                  remove_url = TRUE,
                  remove_separators = TRUE)
-extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go", "one")
+extended_stopwords <- c(stopwords("english"), "disney", "disneyland", "park", "time", "day", "get", "go", "great", "love", "like", "just", "place", "visit", "kid", "ride")
 
 # Remove common stopwords
 tokens <- tokens_select(tokens, pattern = extended_stopwords, selection = "remove")
@@ -192,6 +192,7 @@ top_terms %>%
 
 ```
 
+
 Next we create a topic model for negative sentiment reviews with a rating of 1 and 2:
 ```{r}
 bad_sentiment_reviews <- subset(reviews, sentiment.syuzhet < 0 & Rating <= 2)
@@ -224,70 +225,6 @@ top_terms_bad %>%
   coord_flip()
 ```
 
-```{r}
-# 
-# # First we reate a word cloud to visualize the most common words in the reviews
-# reviews_corpus <- Corpus(VectorSource(reviews$Review_Text))
-# 
-# # Preprocessing the text data:
-# toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
-# reviews_corpus <- tm_map(reviews_corpus, toSpace, "/")
-# reviews_corpus <- tm_map(reviews_corpus, toSpace, "@")
-# reviews_corpus <- tm_map(reviews_corpus, toSpace, "\\|")
-# reviews_corpus <- tm_map(reviews_corpus, content_transformer(tolower))
-# reviews_corpus <- tm_map(reviews_corpus, removeNumbers)
-# reviews_corpus <- tm_map(reviews_corpus, removeWords, c("disney", "park", "disneyland", stopwords("english")))
-# reviews_corpus <- tm_map(reviews_corpus, removePunctuation)
-# reviews_corpus <- tm_map(reviews_corpus, stripWhitespace)
-# 
-# # # Creating a term document matrix
-# term.matrix <- TermDocumentMatrix(reviews_corpus)
-# 
-# # Remove terms that occur in less than 1% of the documents - because the dataset was too large to process (R ran out of memory)
-# term.matrix <- removeSparseTerms(term.matrix, 0.99)
-# 
-# # convert to a regular matrix
-# term.matrix <- as.matrix(term.matrix)
-# 
-# v <- sort(rowSums(term.matrix),decreasing=TRUE)
-# data <- data.frame(word = names(v),freq=v)
-# head(data, 10)
-# 
-# set.seed(17)
-# wordcloud(words = data$word, freq = data$freq, min.freq = 1,
-#           max.words=200, random.order=FALSE, rot.per=0.35,
-#           colors=brewer.pal(8, "Dark2"))
-
-
-```
-
-```{r}
-# #Now we create a wordcloud for bad sentiment reviews
-# 
-# # Select only the reviews with a rating of 1 or 2
-# reviews_corpus_negative <- reviews_corpus[reviews$Rating %in% c(1, 2)]
-# 
-# reviews_corpus_negative$sentiment.syuzhet <- get_sentiment(reviews_corpus_negative,
-#                                                   method="syuzhet",
-#                                                   lang="english")
-# 
-# # Create a word cloud for the review with a negative sentiment
-# reviews_corpus_negative <- reviews_corpus[reviews_corpus$sentiment.syuzhet < 0]
-# 
-# # Creating a term document matrix
-# term.matrix.negative <- TermDocumentMatrix(reviews_corpus_negative)
-# term.matrix.negative <- as.matrix(term.matrix.negative)
-# 
-# v <- sort(rowSums(term.matrix.negative),decreasing=TRUE)
-# data <- data.frame(word = names(v),freq=v)
-# 
-# set.seed(17)
-# wordcloud(words = data$word, freq = data$freq, min.freq = 1,
-#           max.words=200, random.order=FALSE, rot.per=0.35,
-#           colors=brewer.pal(8, "Dark2"))
-
-
-```
 
 TODO: summarize the findings from the topic modelling 
 
