@@ -5454,27 +5454,109 @@ data_keijo &lt;- data.frame(
   explainability.model_None.I.do.not.use.these.model.explanation.techniques = 0
 )
 
+data_cyril &lt;- data.frame(
+  gender = &quot;Male&quot;,
+  age = &quot;25-29&quot;,
+  country = &quot;Switzerland&quot;,
+  education = &quot;Bachelor’s degree&quot;,
+  undergraduate_major = &quot;Other&quot;,
+  job_role = &quot;Business Analyst&quot;,
+  industry = &quot;Insurance/Risk Assessment&quot;,
+  years_experience = &quot;0-1&quot;,
+  ML_atwork = &quot;No (we do not use ML methods)&quot;,
+  Activities_Analyze.and.understand.data.to.influence.product.or.business.decisions = 1,
+  Activities_Build.and.or.run.a.machine.learning.service.that.operationally.improves.my.product.or.workflows = 0,
+  Activities_Build.and.or.run.the.data.infrastructure.that.my.business.uses.for.storing..analyzing..and.operationalizing.data = 0,
+  Activities_Build.prototypes.to.explore.applying.machine.learning.to.new.areas = 0,
+  Activities_Do.research.that.advances.the.state.of.the.art.of.machine.learning = 0,
+  Activities_None.of.these.activities.are.an.important.part.of.my.role.at.work = 0,
+  Notebooks_Kaggle.Kernels = 0,
+  Notebooks_Google.Colab = 0,
+  Notebooks_Azure.Notebook = 0,
+  Notebooks_Google.Cloud.Datalab = 0,
+  Notebooks_JupyterHub.Binder = 0,
+  Notebooks_None = 1,
+  cloud_Google.Cloud.Platform..GCP. = 0,
+  cloud_Amazon.Web.Services..AWS. = 0,
+  cloud_Microsoft.Azure = 0,
+  cloud_IBM.Cloud = 0,
+  cloud_Alibaba.Cloud = 0,
+  cloud_I.have.not.used.any.cloud.providers = 1,
+  Programming_Python = 0,
+  Programming_R = 0,
+  Programming_SQL = 0,
+  Programming_Bash = 0,
+  Programming_Java = 0,
+  Programming_Javascript.Typescript = 0,
+  Programming_Visual.Basic.VBA = 0,
+  Programming_C.C.. = 0,
+  Programming_MATLAB = 0,
+  Programming_Scala = 0,
+  Programming_Julia = 0,
+  Programming_SAS.STATA = 0,
+  Programming_language_used_most_often = &quot;Other&quot;,
+  ML_framework_Scikit.Learn = 0,
+  ML_framework_TensorFlow = 0,
+  ML_framework_Keras = 0,
+  ML_framework_PyTorch = 0,
+  ML_framework_Spark.MLlib = 0,
+  ML_framework_H20 = 0,
+  ML_framework_Caret = 0,
+  ML_framework_Xgboost = 0,
+  ML_framework_randomForest = 0,
+  ML_framework_None = 1,
+  Visualization_ggplot2 = 0,
+  Visualization_Matplotlib = 0,
+  Visualization_Altair = 0,
+  Visualization_Shiny = 0,
+  Visualization_Plotly = 0,
+  Visualization_None = 1,
+  percent_actively.coding = &quot;0% of my time&quot;,
+  How.long.have.you.been.writing.code.to.analyze.data. = &quot;1-2 years&quot;,
+  For.how.many.years.have.you.used.machine.learning.methods..at.work.or.in.school.. = &quot;&lt; 1 year&quot;,
+  Do.you.consider.yourself.to.be.a.data.scientist. = &quot;Definitely not&quot;,
+  data_Categorical.Data = 0,
+  data_Genetic.Data = 0,
+  data_Geospatial.Data = 0,
+  data_Image.Data = 0,
+  data_Numerical.Data = 0,
+  data_Sensor.Data = 0,
+  data_Tabular.Data = 0,
+  data_text.Data = 0,
+  data_Time.Series.Data = 0,
+  data_Video.Data = 0,
+  explainability.model_Examine.individual.model.coefficients = 0,
+  explainability.model_examine.feature.correlations = 0,
+  explainability.model_Examine.feature.importances = 0,
+  explainability.model_Create.partial.dependence.plots = 0,
+  explainability.model_LIME.functions = 0,
+  explainability.model_SHAP.functions = 0,
+  explainability.model_None.I.do.not.use.these.model.explanation.techniques = 1
+)
+
+
 # Calculate the mean and standard deviation of the wage column in the original training data. This is used for the descaling later on
 mean_wage &lt;- mean(data_train$wage, na.rm = TRUE)
 sd_wage &lt;- sd(data_train$wage, na.rm = TRUE)
 
 prediction_roman &lt;- predict(model_nn_3, newdata = data_roman)
 # prediction_akash &lt;- predict(model_nn_3, newdata = data_akash)
-# prediction_cyril &lt;- predict(model_nn_3, newdata = data_cyril)
+prediction_cyril &lt;- predict(model_nn_3, newdata = data_cyril)
 prediction_keijo &lt;- predict(model_nn_3, newdata = data_keijo)
 
 # Descale the prediction
 prediction_roman_descaled &lt;- prediction_roman * sd_wage + mean_wage
 # prediction_akash_descaled &lt;- prediction_akash * sd_wage + mean_wage
-# prediction_cyril_descaled &lt;- prediction_cyril * sd_wage + mean_wage
+prediction_cyril_descaled &lt;- prediction_cyril * sd_wage + mean_wage
 prediction_keijo_descaled &lt;- prediction_keijo * sd_wage + mean_wage
 
 
 cat(&quot;Predicted loan Roman: &quot;, prediction_roman_descaled)</code></pre>
 <pre><code>## Predicted loan Roman:  122800.9</code></pre>
 <pre class="r"><code># cat(&quot;Predicted loan Akash: &quot;, prediction_akash)
-# cat(&quot;Predicted loan Cyril: &quot;, prediction_cyril)
-cat(&quot;Predicted loan Keijo: &quot;, prediction_keijo_descaled)</code></pre>
+cat(&quot;Predicted loan Cyril: &quot;, prediction_cyril_descaled)</code></pre>
+<pre><code>## Predicted loan Cyril:  68875.04</code></pre>
+<pre class="r"><code>cat(&quot;Predicted loan Keijo: &quot;, prediction_keijo_descaled)</code></pre>
 <pre><code>## Predicted loan Keijo:  130254.7</code></pre>
 </div>
 
