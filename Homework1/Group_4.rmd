@@ -595,16 +595,16 @@ data_roman <- data.frame(
 )
 
 # Akash
-data_Akash <- data.frame(
+data_akash <- data.frame(
   gender = "Male",
   age = "25-29",
   country = "Switzerland",
   education = "Bachelor’s degree",
   undergraduate_major = "Other",
-  job_role = "Business Analyst / Product Owner",
-  industry = "Think-Tank",
-  years_experience = "3-5",
-  ML_atwork = "We have well established ML methods (i.e., models in production for more than 4 years)"",
+  job_role = "Business Analyst",
+  industry = "Other",
+  years_experience = "3-4",
+  ML_atwork = "We have well established ML methods (i.e., models in production for more than 2 years)",
   Activities_Analyze.and.understand.data.to.influence.product.or.business.decisions = 1,
   Activities_Build.and.or.run.a.machine.learning.service.that.operationally.improves.my.product.or.workflows = 1,
   Activities_Build.and.or.run.the.data.infrastructure.that.my.business.uses.for.storing..analyzing..and.operationalizing.data = 1,
@@ -652,8 +652,8 @@ data_Akash <- data.frame(
   Visualization_Shiny = 1,
   Visualization_Plotly = 1,
   Visualization_None = 0,
-  percent_actively.coding = "10% to 20% of my time",
-  How.long.have.you.been.writing.code.to.analyze.data. = "2 years",
+  percent_actively.coding = "1% to 25% of my time",
+  How.long.have.you.been.writing.code.to.analyze.data. = "1-2 years",
   For.how.many.years.have.you.used.machine.learning.methods..at.work.or.in.school.. = "< 1 year",
   Do.you.consider.yourself.to.be.a.data.scientist. = "Definitely not",
   data_Categorical.Data = 0,
@@ -844,19 +844,19 @@ mean_wage <- mean(data_train$wage, na.rm = TRUE)
 sd_wage <- sd(data_train$wage, na.rm = TRUE)
 
 prediction_roman <- predict(model_nn_3, newdata = data_roman)
-# prediction_akash <- predict(model_nn_3, newdata = data_akash)
+prediction_akash <- predict(model_nn_3, newdata = data_akash)
 prediction_cyril <- predict(model_nn_3, newdata = data_cyril)
 prediction_keijo <- predict(model_nn_3, newdata = data_keijo)
 
 # Descale the prediction
 prediction_roman_descaled <- prediction_roman * sd_wage + mean_wage
-# prediction_akash_descaled <- prediction_akash * sd_wage + mean_wage
+prediction_akash_descaled <- prediction_akash * sd_wage + mean_wage
 prediction_cyril_descaled <- prediction_cyril * sd_wage + mean_wage
 prediction_keijo_descaled <- prediction_keijo * sd_wage + mean_wage
 
 
 cat("Predicted loan Roman: ", prediction_roman_descaled)
-# cat("Predicted loan Akash: ", prediction_akash)
+cat("Predicted loan Akash: ", prediction_akash_descaled)
 cat("Predicted loan Cyril: ", prediction_cyril_descaled)
 cat("Predicted loan Keijo: ", prediction_keijo_descaled)
 ```
